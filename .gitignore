@@ -1,0 +1,52 @@
+# ==============================================================================
+# GRICC Security & Git Ignore Configuration
+# Enforces zero-leakage of database records, keys, backups, and dependencies.
+# ==============================================================================
+
+# Environment variables & local secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+
+# SQLite Database files (Live databases must never be committed)
+server/data/*.db
+server/data/*.db-wal
+server/data/*.db-shm
+server/data/*.db-journal
+
+# Database Backups & Encrypted Artifacts
+server/backups/
+*.enc
+*.tmp.db
+*.bak
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production builds
+dist/
+dist-ssr/
+
+# Runtime logs & crash reports
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Editor & OS Artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+
+# Vitest & Coverage Reports
+coverage/
+.vitest/

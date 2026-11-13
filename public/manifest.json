@@ -1,0 +1,23 @@
+{
+  "name": "GRICC - Global Risk Intelligence Command Centre",
+  "short_name": "GRICC",
+  "description": "Geopolitical risk intelligence, open-source hazard monitoring, and tactical command center.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
+

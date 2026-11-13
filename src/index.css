@@ -1,0 +1,103 @@
+@import 'leaflet/dist/leaflet.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070b16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3266;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2b4485;
+}
+
+/* Leaflet custom dark theme */
+.leaflet-container {
+  background: #070b16 !important;
+  font-family: inherit;
+  z-index: 10;
+}
+
+/* Custom dark popup styling */
+.leaflet-popup-content-wrapper {
+  background: #0b1329 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #1e3266 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: #0b1329 !important;
+  border: 1px solid #1e3266 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 8px 10px !important;
+  top: 6px !important;
+  right: 6px !important;
+  font-size: 16px !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #38bdf8 !important;
+}
+
+/* Custom zoom control styling */
+.leaflet-bar {
+  border: 1px solid #1e3266 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+}
+
+.leaflet-bar a {
+  background-color: #0b1329 !important;
+  border-color: #1e3266 !important;
+  color: #38bdf8 !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: #14234b !important;
+  color: #ffffff !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(11, 19, 41, 0.85) !important;
+  color: #64748b !important;
+  font-size: 9px !important;
+  padding: 2px 8px !important;
+  border-top-left-radius: 6px;
+}
+
+.leaflet-control-attribution a {
+  color: #38bdf8 !important;
+}
+
+
