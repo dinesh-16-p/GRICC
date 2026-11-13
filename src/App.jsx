@@ -8,6 +8,7 @@ import LoginPage from './components/LoginPage';
 import UnauthorizedAccess from './components/UnauthorizedAccess';
 import NotificationCentre from './components/NotificationCentre';
 import ErrorBoundary from './components/ErrorBoundary';
+const PlatformHome = lazy(() => import('./components/PlatformHome'));
 const WorldMap = lazy(() => import('./components/WorldMap'));
 const IncidentManagement = lazy(() => import('./components/IncidentManagement'));
 const RiskAnalytics = lazy(() => import('./components/RiskAnalytics'));
@@ -43,7 +44,7 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('home');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Default local operator context (Phase 8 login gate removed per user request)
@@ -803,42 +804,52 @@ export default function App() {
         />
 
         <main className="flex-1 px-4 py-8 md:px-8 max-w-7xl w-full mx-auto space-y-8">
-          {/* Welcome Heading & Description */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-navy-800/80">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
-                <span className="font-mono text-xs uppercase tracking-wider text-cyan-400 font-semibold">
-                  GRICC Operational Intelligence Base
-                </span>
+          {/* Welcome Heading & Description (shown for operational deck tabs) */}
+          {activeTab !== 'home' && (
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-midnight-border">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="h-2 w-2 rounded-full bg-accent-cyan shadow-[0_0_8px_#00C2FF]"></span>
+                  <span className="font-mono text-xs uppercase tracking-wider text-accent-cyan font-semibold">
+                    GRICC Operational Intelligence Base
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-accent-ice">
+                  {activeTab === 'dashboard'
+                    ? 'Global Risk Intelligence Command Deck'
+                    : activeTab === 'risk-map'
+                      ? 'Global Risk Map & Hazard Visualization'
+                      : activeTab === 'country-risk'
+                        ? 'Country Risk Profiles & Stability Index'
+                        : activeTab === 'ai-assistant'
+                          ? 'AI Strategic Intelligence Assistant'
+                          : 'Operational Intelligence Deck'}
+                </h2>
+                <p className="mt-1 text-sm text-accent-muted">
+                  Centralised global risk monitoring, verified open-source intelligence & telemetry gateway.
+                </p>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                Global Risk Intelligence Overview
-              </h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Centralised global risk monitoring, verified open-source intelligence & telemetry gateway.
-              </p>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-400 bg-navy-900/80 border border-navy-700/60 rounded-xl px-3.5 py-2">
-              <span className="text-slate-400">STATUS:</span>
-              <span className={operationalMode === 'LIVE MODE' ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
-                {operationalMode}
-              </span>
-              <span className="mx-1 text-navy-700">|</span>
-              <span className="text-cyan-400">PHASE 6 GATEWAY</span>
-              <span className="mx-1 text-navy-700">|</span>
-              <button
-                onClick={handleManualRefresh}
-                disabled={isTelemetryLoading}
-                className="hover:text-white transition-colors flex items-center gap-1 text-cyan-300"
-                title="Synchronize live provider streams"
-              >
-                <RefreshCw className={`h-3 w-3 ${isTelemetryLoading ? 'animate-spin' : ''}`} />
-                <span>Sync</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-accent-secondary bg-midnight-surface/90 border border-midnight-border rounded-xl px-3.5 py-2 shadow-sm">
+                <span className="text-accent-muted">STATUS:</span>
+                <span className={operationalMode === 'LIVE MODE' ? 'text-accent-teal font-bold' : 'text-risk-medium font-bold'}>
+                  {operationalMode}
+                </span>
+                <span className="mx-1 text-midnight-border">|</span>
+                <span className="text-accent-cyan">PHASE 6 GATEWAY</span>
+                <span className="mx-1 text-midnight-border">|</span>
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isTelemetryLoading}
+                  className="hover:text-white transition-colors flex items-center gap-1 text-accent-cyan"
+                  title="Synchronize live provider streams"
+                >
+                  <RefreshCw className={`h-3 w-3 ${isTelemetryLoading ? 'animate-spin' : ''}`} />
+                  <span>Sync</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Conditional View by Sidebar Active Tab */}
           <Suspense
@@ -848,7 +859,25 @@ export default function App() {
               </div>
             }
           >
-          {activeTab === 'risk-map' ? (
+          {activeTab === 'home' ? (
+            /* Transformed Platform Home View (Phase 24.5 - Midnight Intelligence) */
+            <section className="space-y-6">
+              <ErrorBoundary name="Platform Home">
+                <PlatformHome
+                  stats={stats}
+                  alerts={alerts}
+                  incidents={incidents}
+                  countryProfiles={countryProfiles}
+                  operationalMode={operationalMode}
+                  onNavigate={(tab) => setActiveTab(tab)}
+                  onSelectCountry={(countryName) => {
+                    setSelectedProfileCountry(countryName);
+                    setActiveTab('country-risk');
+                  }}
+                />
+              </ErrorBoundary>
+            </section>
+          ) : activeTab === 'risk-map' ? (
             /* Dedicated Global Risk Map View (Phase 2 + Live NASA EONET Hazards + SQLite Incidents + Country Risk) */
             <section className="space-y-6">
               <ErrorBoundary name="Global Risk Map">

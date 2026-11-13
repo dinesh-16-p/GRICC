@@ -3,8 +3,28 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Midnight Intelligence Design Tokens */
+  --color-midnight-base: #081426;
+  --color-midnight-blue: #102A43;
+  --color-dark-surface: #0B192B;
+  --color-electric-cyan: #00C2FF;
+  --color-teal-accent: #36D6B0;
+  --color-ice-white: #EAF2F8;
+  --color-text-secondary: #A8B9CC;
+  --color-text-muted: #72869B;
+
+  /* Risk Scale */
+  --color-risk-critical: #FF4D5A;
+  --color-risk-high: #FF8A45;
+  --color-risk-medium: #F5C451;
+  --color-risk-low: #36D6B0;
+}
+
 @layer base {
   body {
+    background-color: var(--color-midnight-base);
+    color: var(--color-ice-white);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 }
@@ -16,32 +36,32 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #070b16;
+  background: #081426;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e3266;
+  background: #1B3552;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b4485;
+  background: #2A5282;
 }
 
 /* Leaflet custom dark theme */
 .leaflet-container {
-  background: #070b16 !important;
+  background: #081426 !important;
   font-family: inherit;
   z-index: 10;
 }
 
 /* Custom dark popup styling */
 .leaflet-popup-content-wrapper {
-  background: #0b1329 !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #1e3266 !important;
+  background: #0B192B !important;
+  color: #EAF2F8 !important;
+  border: 1px solid #1B3552 !important;
   border-radius: 1rem !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 194, 255, 0.15) !important;
   padding: 0 !important;
   overflow: hidden;
 }
@@ -52,12 +72,12 @@
 }
 
 .leaflet-popup-tip {
-  background: #0b1329 !important;
-  border: 1px solid #1e3266 !important;
+  background: #0B192B !important;
+  border: 1px solid #1B3552 !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-  color: #94a3b8 !important;
+  color: #A8B9CC !important;
   padding: 8px 10px !important;
   top: 6px !important;
   right: 6px !important;
@@ -65,39 +85,55 @@
 }
 
 .leaflet-container a.leaflet-popup-close-button:hover {
-  color: #38bdf8 !important;
+  color: #00C2FF !important;
 }
 
 /* Custom zoom control styling */
 .leaflet-bar {
-  border: 1px solid #1e3266 !important;
+  border: 1px solid #1B3552 !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important;
   border-radius: 0.5rem !important;
   overflow: hidden;
 }
 
 .leaflet-bar a {
-  background-color: #0b1329 !important;
-  border-color: #1e3266 !important;
-  color: #38bdf8 !important;
+  background-color: #0B192B !important;
+  border-color: #1B3552 !important;
+  color: #00C2FF !important;
   transition: all 0.2s ease;
 }
 
 .leaflet-bar a:hover {
-  background-color: #14234b !important;
+  background-color: #102A43 !important;
   color: #ffffff !important;
 }
 
 .leaflet-control-attribution {
-  background: rgba(11, 19, 41, 0.85) !important;
-  color: #64748b !important;
+  background: rgba(11, 25, 43, 0.85) !important;
+  color: #72869B !important;
   font-size: 9px !important;
   padding: 2px 8px !important;
   border-top-left-radius: 6px;
 }
 
 .leaflet-control-attribution a {
-  color: #38bdf8 !important;
+  color: #00C2FF !important;
+}
+
+/* Utility classes for Midnight Intelligence Cards & Borders */
+.midnight-card {
+  background: #0B192B;
+  border: 1px solid #1B3552;
+  border-radius: 1rem;
+}
+
+.midnight-card:hover {
+  border-color: rgba(0, 194, 255, 0.4);
+}
+
+.glow-cyan-border {
+  border: 1px solid rgba(0, 194, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 194, 255, 0.15);
 }
 
 

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   LayoutDashboard,
   Globe,
+  Globe2,
   Radio,
   AlertTriangle,
   BarChart3,
@@ -22,7 +23,8 @@ import {
 } from 'lucide-react';
 
 const navigationItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
+  { id: 'home', label: 'Platform Home', icon: Globe2, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
+  { id: 'dashboard', label: 'Command Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
   { id: 'risk-map', label: 'Global Risk Map', icon: Globe, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
   { id: 'geospatial', label: 'Geospatial Intel', icon: Compass, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
   { id: 'intel-feed', label: 'Intelligence Feed', icon: Radio, roles: ['ADMIN', 'ANALYST', 'VIEWER'] },
@@ -52,35 +54,35 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen, setMobile
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-navy-950/80 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-midnight-base/85 backdrop-blur-md lg:hidden transition-opacity"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex w-72 flex-col border-r border-navy-700/60 bg-navy-900/95 backdrop-blur-md transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex w-72 flex-col border-r border-midnight-border bg-midnight-surface/98 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-20 items-center justify-between px-6 border-b border-navy-700/60">
+        <div className="flex h-20 items-center justify-between px-6 border-b border-midnight-border">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-              <ShieldAlert className="h-6 w-6 text-cyan-400" />
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-accent-cyan/20 to-blue-600/30 border border-accent-cyan/40 shadow-[0_0_15px_rgba(0,194,255,0.2)]">
+              <ShieldAlert className="h-6 w-6 text-accent-cyan" />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-cyan opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-accent-cyan"></span>
               </span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl tracking-wider text-white">GRICC</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                  HQ
+                <span className="font-extrabold text-xl tracking-wider text-accent-ice">GRICC</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30">
+                  NEXUS
                 </span>
               </div>
-              <p className="text-[11px] font-medium tracking-wide text-slate-400">
+              <p className="text-[11px] font-medium tracking-wide text-accent-muted">
                 Command Centre
               </p>
             </div>
@@ -88,7 +90,7 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen, setMobile
 
           <button
             onClick={() => setMobileOpen(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-navy-800 hover:text-white lg:hidden"
+            className="rounded-lg p-1.5 text-accent-muted hover:bg-midnight-blue hover:text-white lg:hidden"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
@@ -98,11 +100,11 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen, setMobile
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto px-4 py-6">
           <div className="px-3 mb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-muted font-mono">
               Operations & Intelligence
             </p>
           </div>
-          <nav className="space-y-1.5">
+          <nav className="space-y-1">
             {visibleItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -114,28 +116,28 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen, setMobile
                     setActiveTab(item.id);
                     setMobileOpen(false);
                   }}
-                  className={`group relative flex w-full items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                  className={`group relative flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500/15 to-blue-600/10 text-cyan-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-cyan-500/30 font-semibold'
-                      : 'text-slate-400 hover:bg-navy-800/60 hover:text-slate-200 border border-transparent'
+                      ? 'bg-gradient-to-r from-accent-cyan/15 to-blue-600/10 text-accent-cyan shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-accent-cyan/35 font-semibold'
+                      : 'text-accent-secondary hover:bg-midnight-blue/70 hover:text-accent-ice border border-transparent'
                   }`}
                 >
                   {/* Left active accent bar */}
                   {isActive && (
-                    <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+                    <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-accent-cyan shadow-[0_0_8px_#00C2FF]" />
                   )}
 
                   <Icon
-                    className={`h-5 w-5 transition-colors ${
+                    className={`h-4 w-4 transition-colors ${
                       isActive
-                        ? 'text-cyan-400'
-                        : 'text-slate-400 group-hover:text-slate-300'
+                        ? 'text-accent-cyan'
+                        : 'text-accent-muted group-hover:text-accent-ice'
                     }`}
                   />
                   <span className="tracking-wide">{item.label}</span>
 
                   {isActive && (
-                    <span className="ml-auto h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]" />
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent-cyan shadow-[0_0_6px_#00C2FF]" />
                   )}
                 </button>
               );
@@ -144,17 +146,18 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen, setMobile
         </div>
 
         {/* Sidebar Footer / System Badge */}
-        <div className="p-4 border-t border-navy-700/60 bg-navy-950/40">
-          <div className="rounded-xl border border-navy-700/60 bg-navy-850/60 p-3.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Clearance Level</span>
-              <span className="text-cyan-400 font-semibold tracking-wider">DEFCON 4</span>
+        <div className="p-4 border-t border-midnight-border bg-midnight-base/60">
+          <div className="rounded-xl border border-midnight-border bg-midnight-surface p-3.5 shadow-md">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="text-accent-muted">Clearance Level</span>
+              <span className="text-accent-cyan font-bold tracking-wider">DEFCON 4</span>
             </div>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-navy-950 overflow-hidden">
-              <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
+            <div className="mt-2 h-1.5 w-full rounded-full bg-midnight-base overflow-hidden">
+              <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-blue-500 to-accent-cyan shadow-[0_0_8px_rgba(0,194,255,0.5)]" />
             </div>
-            <p className="mt-2 text-[10px] text-slate-400">
-              Encrypted Operational Telemetry Active
+            <p className="mt-2 text-[10px] font-mono text-accent-muted flex items-center justify-between">
+              <span>ENCRYPTED SSE TELEMETRY</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-teal" />
             </p>
           </div>
         </div>

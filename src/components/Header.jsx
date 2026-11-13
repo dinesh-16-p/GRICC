@@ -39,12 +39,12 @@ export default function Header({
         : 'text-slate-300';
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 w-full items-center justify-between border-b border-navy-700/60 bg-navy-900/90 px-4 md:px-8 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex h-20 w-full items-center justify-between border-b border-midnight-border bg-midnight-surface/95 px-4 md:px-8 backdrop-blur-xl">
       {/* Left Section: Mobile Menu + Page Title */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="rounded-lg p-2 text-slate-400 hover:bg-navy-800 hover:text-white lg:hidden"
+          className="rounded-lg p-2 text-accent-muted hover:bg-midnight-blue hover:text-white lg:hidden"
           aria-label="Open sidebar"
         >
           <Menu className="h-6 w-6" />
@@ -52,16 +52,16 @@ export default function Header({
 
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-lg md:text-xl font-bold tracking-tight text-white">
-              Global Risk Intelligence
+            <h1 className="text-lg md:text-xl font-bold tracking-tight text-accent-ice">
+              GRICC Nexus Command
             </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-400 border border-blue-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-accent-cyan/10 px-2.5 py-0.5 text-[11px] font-semibold text-accent-cyan border border-accent-cyan/30 shadow-[0_0_10px_rgba(0,194,255,0.15)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan animate-pulse"></span>
               SECURE
             </span>
           </div>
-          <p className="text-xs text-slate-400 hidden sm:block">
-            Global Risk Intelligence Command Centre • Operational View
+          <p className="text-xs text-accent-muted hidden sm:block">
+            Global Risk, Intelligence & Conflict Center • Operational Defense Node
           </p>
         </div>
       </div>
@@ -70,16 +70,16 @@ export default function Header({
       <div className="flex items-center gap-3 md:gap-5">
         {/* Search Bar */}
         <div className="relative hidden md:block w-64 lg:w-80">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-accent-muted">
             <Search className="h-4 w-4" />
           </div>
           <input
             type="text"
             placeholder="Search threats, regions, incidents..."
-            className="w-full rounded-xl border border-navy-700/80 bg-navy-950/60 py-2 pl-10 pr-4 text-xs md:text-sm text-slate-200 placeholder-slate-400 focus:border-cyan-500/60 focus:bg-navy-950 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
+            className="w-full rounded-xl border border-midnight-border bg-midnight-base/80 py-2 pl-10 pr-4 text-xs md:text-sm text-accent-ice placeholder-accent-muted focus:border-accent-cyan/60 focus:bg-midnight-base focus:outline-none focus:ring-1 focus:ring-accent-cyan/50 transition-all"
             readOnly
           />
-          <kbd className="hidden lg:inline-flex absolute right-3 top-2.5 items-center rounded border border-navy-700 bg-navy-900 px-1.5 text-[10px] font-mono text-slate-400">
+          <kbd className="hidden lg:inline-flex absolute right-3 top-2.5 items-center rounded border border-midnight-border bg-midnight-surface px-1.5 text-[10px] font-mono text-accent-muted">
             ⌘K
           </kbd>
         </div>
@@ -88,23 +88,23 @@ export default function Header({
         <div
           className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
             isLive
-              ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-              : 'border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.1)]'
+              ? 'border-accent-teal/40 bg-accent-teal/15 text-accent-teal shadow-[0_0_12px_rgba(54,214,176,0.25)]'
+              : 'border-risk-medium/30 bg-risk-medium/10 text-risk-medium shadow-[0_0_12px_rgba(245,196,81,0.15)]'
           }`}
         >
           <span className="relative flex h-2 w-2">
             <span
               className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                isLive ? 'bg-emerald-400' : 'bg-amber-400'
+                isLive ? 'bg-accent-teal' : 'bg-risk-medium'
               }`}
             ></span>
             <span
               className={`relative inline-flex rounded-full h-2 w-2 ${
-                isLive ? 'bg-emerald-500' : 'bg-amber-500'
+                isLive ? 'bg-accent-teal' : 'bg-risk-medium'
               }`}
             ></span>
           </span>
-          <span className="tracking-wider uppercase font-mono text-[11px]">
+          <span className="font-mono text-[11px] tracking-wide">
             {isRefreshing ? 'SYNCING...' : operationalMode}
           </span>
         </div>
