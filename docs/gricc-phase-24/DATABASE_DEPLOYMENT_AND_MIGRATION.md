@@ -2,7 +2,7 @@
 
 **Document:** `DATABASE_DEPLOYMENT_AND_MIGRATION.md`  
 **Phase:** 24 of 50 — Public VPS Hosting, Domain Connection, DNS, Nginx, HTTPS & Production Deployment  
-**Domain:** `griccglobal.com`  
+**Domain:** `griccnexus.com`  
 **Status:** MIGRATION PLAN READY  
 
 ---

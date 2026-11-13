@@ -2,7 +2,7 @@
 
 **Document:** `NGINX_AND_PM2_CONFIGURATION.md`  
 **Phase:** 24 of 50 — Public VPS Hosting, Domain Connection, DNS, Nginx, HTTPS & Production Deployment  
-**Domain:** `griccglobal.com`  
+**Domain:** `griccnexus.com`  
 **Status:** CONFIGURATION READY  
 
 ---
@@ -41,11 +41,11 @@ module.exports = {
 
 ## 2. Nginx Reverse Proxy Architecture
 
-Installed from `deploy/nginx.griccglobal.com.conf` into `/etc/nginx/sites-available/griccglobal.com`:
+Installed from `deploy/nginx.griccnexus.com.conf` into `/etc/nginx/sites-available/griccnexus.com`:
 
 ```bash
-sudo cp deploy/nginx.griccglobal.com.conf /etc/nginx/sites-available/griccglobal.com
-sudo ln -sf /etc/nginx/sites-available/griccglobal.com /etc/nginx/sites-enabled/
+sudo cp deploy/nginx.griccnexus.com.conf /etc/nginx/sites-available/griccnexus.com
+sudo ln -sf /etc/nginx/sites-available/griccnexus.com /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx

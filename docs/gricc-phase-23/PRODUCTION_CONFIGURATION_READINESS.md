@@ -56,3 +56,4 @@ module.exports = {
 - **Liveness Probe:** `GET /api/health` — Returns status `HEALTHY` and database connection state (`CONNECTED`).
 - **Readiness Probe:** Verified via `test-production-readiness.mjs` (all 18 production readiness assertions pass).
 - **Telemetry Probe:** `GET /api/telemetry` — Returns system uptime, memory RSS, heap usage, and event loop metrics.
+

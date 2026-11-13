@@ -14,14 +14,9 @@ echo "  Deploying GRICC 2.0 Production Release"
 echo "  Target: griccnexus.com"
 echo "=================================================="
 
-# 1. Install production dependencies
-echo "[1/6] Installing Node dependencies..."
-npm ci --omit=dev
-
-# 2. Build production frontend assets
-echo "[2/6] Building React production bundle with Vite..."
-# Vite build requires devDependencies for compilation
-npm install --include=dev
+# 1. Install dependencies & build frontend bundle
+echo "[1/6] Installing dependencies and building production bundle..."
+npm ci
 npm run build
 npm prune --omit=dev
 

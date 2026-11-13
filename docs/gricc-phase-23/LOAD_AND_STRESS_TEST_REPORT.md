@@ -40,3 +40,4 @@
 1. **Sub-50ms Median Latency at Scale:** Even at 50 concurrent virtual users generating 1,000 requests, median latency for complex analytical endpoints (`/api/countries`) remained under 45ms.
 2. **Rate Limiting Protection:** When rate limits were left at standard development defaults (600 req/15m), the Express `rateLimit` middleware accurately throttled traffic with HTTP 429 TooManyRequests at request 601, proving that DoS prevention is active.
 3. **Memory Stability:** Peak heap usage during the 1,000-request bursts remained under 75 MB, with zero memory leaks detected following garbage collection.
+

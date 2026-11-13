@@ -49,3 +49,4 @@ When the server receives `SIGTERM` or `SIGINT`, `closeAllSseClients()` gracefull
 ## 4. Single-Instance Architecture Notice
 
 SSE state is maintained in-process within a native JavaScript `Map`. Multi-process clustering (e.g. PM2 cluster mode) remains restricted until a Redis Pub/Sub backplane is implemented.
+

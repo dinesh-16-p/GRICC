@@ -2,7 +2,7 @@
 
 **Document:** `SERVER_SETUP_AND_HARDENING.md`  
 **Phase:** 24 of 50 — Public VPS Hosting, Domain Connection, DNS, Nginx, HTTPS & Production Deployment  
-**Target Domain:** `griccglobal.com`  
+**Target Domain:** `griccnexus.com`  
 **Target OS:** Ubuntu 24.04 LTS (x64)  
 **Target Region:** DigitalOcean Bengaluru (`BLR1`)  
 **Status:** SPECIFICATION READY FOR PROVISIONING  

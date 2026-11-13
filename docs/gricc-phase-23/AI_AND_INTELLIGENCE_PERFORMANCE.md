@@ -40,3 +40,4 @@ Tested via isolated test harness:
 - PDF executive summary export: **28.0 ms** generation time.
 - Status and health checking: **2.4 ms**.
 - Source references and citations verified across all synthesized reports.
+

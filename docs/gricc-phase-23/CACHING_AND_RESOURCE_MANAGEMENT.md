@@ -66,3 +66,4 @@ async getOrSet(key, ttlMs, loaderFn) {
 - **Process-Local Scope:** The in-memory store resides within the single Node.js process heap.
 - **PM2 Constraint:** Multi-process cluster mode remains **disabled** until an external distributed caching layer (e.g. Redis / Valkey) is integrated in future architectural phases.
 - **Memory Footprint:** Verified under maximum cache utilization (< 8 MB allocated for cache store).
+

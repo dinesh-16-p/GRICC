@@ -15,7 +15,7 @@ echo "=================================================="
 # 1. Update OS Packages
 echo "[1/8] Updating Ubuntu system packages..."
 apt-get update && apt-get upgrade -y
-apt-get install -y curl wget git ufw unattended-upgrades build-essential certbot python3-certbot-nginx fail2ban htop
+apt-get install -y nginx curl wget git ufw unattended-upgrades build-essential certbot python3-certbot-nginx fail2ban htop
 
 # 2. Configure Automatic Security Updates
 echo "[2/8] Configuring automatic security updates..."
@@ -40,6 +40,22 @@ else
     usermod -aG sudo gricc
     echo "User 'gricc' created."
 fi
+
+# Ensure SSH directory and authorized_keys exist for user 'gricc' (prevents lockout if root SSH is disabled)
+mkdir -p /home/gricc/.ssh
+if [ -f /root/.ssh/authorized_keys ]; then
+    cp /root/.ssh/authorized_keys /home/gricc/.ssh/authorized_keys
+    chown -R gricc:gricc /home/gricc/.ssh
+    chmod 700 /home/gricc/.ssh
+    chmod 600 /home/gricc/.ssh/authorized_keys
+    echo "Imported root SSH authorized_keys to 'gricc' user."
+fi
+
+# Configure sudoers for automated Nginx reload without interactive password prompt
+cat << 'EOF' > /etc/sudoers.d/gricc-deploy
+gricc ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t, /bin/systemctl reload nginx, /bin/systemctl restart nginx
+EOF
+chmod 440 /etc/sudoers.d/gricc-deploy
 
 # 5. Install Node.js 24 LTS via NodeSource
 echo "[5/8] Installing Node.js 24 LTS..."
