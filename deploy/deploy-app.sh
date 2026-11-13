@@ -11,7 +11,7 @@ cd "$APP_DIR"
 
 echo "=================================================="
 echo "  Deploying GRICC 2.0 Production Release"
-echo "  Target: griccglobal.com"
+echo "  Target: griccnexus.com"
 echo "=================================================="
 
 # 1. Install production dependencies
@@ -48,5 +48,6 @@ sudo systemctl reload nginx
 
 echo "=================================================="
 echo "  GRICC 2.0 Deployment Successfully Completed!"
-echo "  Public URL: https://griccglobal.com"
+echo "  Public URL: https://griccnexus.com"
 echo "=================================================="
+

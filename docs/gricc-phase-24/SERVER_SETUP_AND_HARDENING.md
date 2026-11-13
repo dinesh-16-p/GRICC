@@ -49,3 +49,4 @@ Managed via `deploy/setup-server.sh`:
 - **Reverse Proxy:** Nginx (`apt install -y nginx`)
 - **TLS Engine:** Certbot & Python3 Nginx plugin (`apt install -y certbot python3-certbot-nginx`)
 - **Intrusion Prevention:** Fail2Ban (`apt install -y fail2ban`) monitoring SSH failed attempts.
+

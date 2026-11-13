@@ -48,3 +48,4 @@ On the VPS:
 1. `PRAGMA integrity_check;` $\rightarrow$ `ok`.
 2. Verify Row ID 222 hash matches `51b6dc808cbf71c4403db14356867785cca83a2e13a48af66bdd9cbc72d0147d`.
 3. Verify file permissions: `chmod 600 /var/www/gricc/server/data/gricc.db`.
+

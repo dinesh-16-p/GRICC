@@ -56,3 +56,4 @@ sudo systemctl reload nginx
 - **`location /assets/`:** Static JS/CSS assets cached with `expires 1y; add_header Cache-Control "public, immutable";`.
 - **`location /api/`:** Proxies requests to internal Express listener at `http://127.0.0.1:5000` with `X-Forwarded-For` and `X-Forwarded-Proto`.
 - **`location ~ ^/api/(events|monitoring)/stream$`:** Server-Sent Events (SSE) streaming with `proxy_buffering off; chunked_transfer_encoding on; proxy_read_timeout 3600s;`.
+

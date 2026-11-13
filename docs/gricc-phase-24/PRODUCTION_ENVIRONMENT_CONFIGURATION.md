@@ -2,12 +2,12 @@
 
 **Document:** `PRODUCTION_ENVIRONMENT_CONFIGURATION.md`  
 **Phase:** 24 of 50 — Public VPS Hosting, Domain Connection, DNS, Nginx, HTTPS & Production Deployment  
-**Domain:** `griccglobal.com`  
-**Status:** SPECIFICATION READY  
+**Domain:** `griccnexus.com`  
+**Status:** SPECIFICATION CONFIGURED FOR GRICCNEXUS.COM  
 
 ---
 
-## 1. Production `.env` Blueprint for `griccglobal.com`
+## 1. Production `.env` Blueprint for `griccnexus.com`
 
 Stored exclusively at `/var/www/gricc/.env` with file permissions `chmod 600` (readable only by user `gricc`):
 
@@ -15,8 +15,8 @@ Stored exclusively at `/var/www/gricc/.env` with file permissions `chmod 600` (r
 # Network & Environment
 NODE_ENV=production
 PORT=5000
-FRONTEND_URL=https://griccglobal.com
-CORS_ORIGIN=https://griccglobal.com,https://www.griccglobal.com
+FRONTEND_URL=https://griccnexus.com
+CORS_ORIGIN=https://griccnexus.com,https://www.griccnexus.com
 TRUST_PROXY=true
 
 # Database Storage & WAL
