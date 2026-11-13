@@ -88,43 +88,49 @@ export const authService = {
     status = 'SUCCESS',
   }) {
     const createdAt = new Date().toISOString();
-    const lastRow = db
-      .prepare('SELECT entry_hash FROM audit_logs WHERE entry_hash IS NOT NULL ORDER BY id DESC LIMIT 1')
-      .get();
-    const prevHash = lastRow?.entry_hash || 'GENESIS';
-    const entryHash = computeAuditEntryHash(prevHash, {
-      userId,
-      username,
-      userRole,
-      action,
-      resourceType,
-      recordId,
-      details,
-      ipAddress,
-      status,
-      createdAt,
+    const insertAuditTx = db.transaction(() => {
+      const lastRow = db
+        .prepare('SELECT entry_hash FROM audit_logs WHERE entry_hash IS NOT NULL ORDER BY id DESC LIMIT 1')
+        .get();
+      const prevHash = lastRow?.entry_hash || 'GENESIS';
+      const entryHash = computeAuditEntryHash(prevHash, {
+        userId,
+        username,
+        userRole,
+        action,
+        resourceType,
+        recordId,
+        details,
+        ipAddress,
+        status,
+        createdAt,
+      });
+
+      db.prepare(`
+        INSERT INTO audit_logs (
+          user_id, username, user_role, action, resource_type, record_id, details, ip_address, status, created_at, prev_hash, entry_hash
+        ) VALUES (
+          @userId, @username, @userRole, @action, @resourceType, @recordId, @details, @ipAddress, @status, @createdAt, @prevHash, @entryHash
+        )
+      `).run({
+        userId,
+        username,
+        userRole,
+        action,
+        resourceType,
+        recordId,
+        details,
+        ipAddress,
+        status,
+        createdAt,
+        prevHash,
+        entryHash,
+      });
+
+      return { prevHash, entryHash };
     });
 
-    db.prepare(`
-      INSERT INTO audit_logs (
-        user_id, username, user_role, action, resource_type, record_id, details, ip_address, status, created_at, prev_hash, entry_hash
-      ) VALUES (
-        @userId, @username, @userRole, @action, @resourceType, @recordId, @details, @ipAddress, @status, @createdAt, @prevHash, @entryHash
-      )
-    `).run({
-      userId,
-      username,
-      userRole,
-      action,
-      resourceType,
-      recordId,
-      details,
-      ipAddress,
-      status,
-      createdAt,
-      prevHash,
-      entryHash,
-    });
+    return insertAuditTx();
   },
 
   /**
