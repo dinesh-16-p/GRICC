@@ -28,10 +28,13 @@ export function getCsrfToken() {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+// In-flight GET request deduplication map to prevent concurrent request stampedes
+const inflightGetRequests = new Map();
+
 /**
  * Robust fetch wrapper with timeout, abort handling, auth header injection, CSRF protection, and exponential backoff retry.
  */
-async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, backoff = 500) {
+async function executeFetchWithRetry(url, options = {}, retries = MAX_RETRIES, backoff = 500) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || DEFAULT_TIMEOUT_MS);
   const token = getAuthToken();
@@ -85,7 +88,7 @@ async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, backoff 
     // Retry only on network failure or 503/504 errors if retries remain
     if (retries > 0 && (isNetwork || err.status === 503 || err.status === 504)) {
       await new Promise((resolve) => setTimeout(resolve, backoff));
-      return fetchWithRetry(url, options, retries - 1, backoff * 2);
+      return executeFetchWithRetry(url, options, retries - 1, backoff * 2);
     }
 
     throw {
@@ -94,9 +97,24 @@ async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, backoff 
       status: err.status || 0,
       code: err.code || null,
       details: err.details || null,
-      timestamp: new Date().toISOString(),
     };
   }
+}
+
+async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, backoff = 500) {
+  const method = (options.method || 'GET').toUpperCase();
+  if (method === 'GET' && retries === MAX_RETRIES && !options.skipDedup) {
+    if (inflightGetRequests.has(url)) {
+      return inflightGetRequests.get(url);
+    }
+    const reqPromise = executeFetchWithRetry(url, options, retries, backoff)
+      .finally(() => {
+        inflightGetRequests.delete(url);
+      });
+    inflightGetRequests.set(url, reqPromise);
+    return reqPromise;
+  }
+  return executeFetchWithRetry(url, options, retries, backoff);
 }
 
 export const apiService = {

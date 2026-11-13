@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-export default function SummaryCard({
+function SummaryCard({
   title,
   value = '—',
   subtext = 'Awaiting telemetry feed',
@@ -72,4 +72,6 @@ export default function SummaryCard({
     </div>
   );
 }
+
+export default memo(SummaryCard);
 

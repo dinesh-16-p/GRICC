@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   AlertOctagon,
   AlertTriangle,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { ALERT_SEVERITY } from '../data/intelligenceData';
 
-export default function AlertCard({ alert, onAcknowledge, onResolve, canModify = true }) {
+function AlertCard({ alert, onAcknowledge, onResolve, canModify = true }) {
   const {
     id,
     title,
@@ -202,3 +202,5 @@ export default function AlertCard({ alert, onAcknowledge, onResolve, canModify =
     </article>
   );
 }
+
+export default memo(AlertCard);

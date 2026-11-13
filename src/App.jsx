@@ -2,16 +2,16 @@ import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from 
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import SummaryCard from './components/SummaryCard';
-import WorldMap from './components/WorldMap';
 import IntelligenceFeed from './components/IntelligenceFeed';
-import IncidentManagement from './components/IncidentManagement';
-import RiskAnalytics from './components/RiskAnalytics';
-import DataSourceHealth from './components/DataSourceHealth';
 import RecentActivities from './components/RecentActivities';
 import LoginPage from './components/LoginPage';
 import UnauthorizedAccess from './components/UnauthorizedAccess';
 import NotificationCentre from './components/NotificationCentre';
 import ErrorBoundary from './components/ErrorBoundary';
+const WorldMap = lazy(() => import('./components/WorldMap'));
+const IncidentManagement = lazy(() => import('./components/IncidentManagement'));
+const RiskAnalytics = lazy(() => import('./components/RiskAnalytics'));
+const DataSourceHealth = lazy(() => import('./components/DataSourceHealth'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const CountryRiskProfiles = lazy(() => import('./components/CountryRiskProfiles'));
 const ReportsPage = lazy(() => import('./components/ReportsPage'));
@@ -1108,15 +1108,34 @@ export default function App() {
               <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
                 <div className="xl:col-span-7">
                   <ErrorBoundary name="Main Dashboard Map">
-                    <WorldMap
-                      liveEvents={liveDisasterEvents}
-                      incidents={incidents}
-                      countryProfiles={countryProfiles}
-                      onSelectCountryProfile={(countryName) => {
-                        setSelectedProfileCountry(countryName);
-                        setActiveTab('country-risk');
-                      }}
-                    />
+                    <Suspense
+                      fallback={
+                        <div className="flex h-[420px] w-full flex-col items-center justify-center rounded-2xl border border-navy-700/60 bg-gradient-to-b from-navy-850/80 to-navy-900/90 p-8 shadow-2xl backdrop-blur-sm">
+                          <div className="relative mb-4 flex h-14 w-14 items-center justify-center">
+                            <div className="absolute inset-0 animate-ping rounded-full bg-cyan-500/20 duration-1000" />
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-cyan-500/40 bg-navy-800 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
+                              <Globe2 className="h-6 w-6 animate-pulse" />
+                            </div>
+                          </div>
+                          <span className="font-mono text-xs font-semibold tracking-wider text-cyan-400">
+                            INITIALIZING GEOSPATIAL RADAR...
+                          </span>
+                          <span className="mt-1 text-[11px] text-slate-500">
+                            Streaming tile telemetry & active crisis coordinates
+                          </span>
+                        </div>
+                      }
+                    >
+                      <WorldMap
+                        liveEvents={liveDisasterEvents}
+                        incidents={incidents}
+                        countryProfiles={countryProfiles}
+                        onSelectCountryProfile={(countryName) => {
+                          setSelectedProfileCountry(countryName);
+                          setActiveTab('country-risk');
+                        }}
+                      />
+                    </Suspense>
                   </ErrorBoundary>
                 </div>
                 <div className="xl:col-span-5">
