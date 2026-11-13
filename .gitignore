@@ -50,3 +50,4 @@ Thumbs.db
 # Vitest & Coverage Reports
 coverage/
 .vitest/
+scratch/

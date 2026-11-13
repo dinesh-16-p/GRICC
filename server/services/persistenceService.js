@@ -1,4 +1,5 @@
 import db from '../db/database.js';
+import cacheService from './cacheService.js';
 
 const VALID_SEVERITIES = ['Critical', 'High', 'Medium', 'Low'];
 const VALID_INCIDENT_STATUSES = ['Open', 'Investigating', 'Contained', 'Resolved'];
@@ -78,7 +79,7 @@ export const persistenceService = {
   // ==========================================
   // INCIDENTS
   // ==========================================
-  getAllIncidents({ severity, status, country, search } = {}) {
+  getAllIncidents({ severity, status, country, search, limit = 1000, offset = 0 } = {}) {
     const conditions = [];
     const params = [];
 
@@ -101,9 +102,11 @@ export const persistenceService = {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const safeLimit = Math.min(2000, Math.max(1, Number(limit) || 1000));
+    const safeOffset = Math.max(0, Number(offset) || 0);
     const rows = db
-      .prepare(`SELECT * FROM incidents ${whereClause} ORDER BY created_at DESC, date_reported DESC`)
-      .all(...params);
+      .prepare(`SELECT * FROM incidents ${whereClause} ORDER BY created_at DESC, date_reported DESC LIMIT ? OFFSET ?`)
+      .all(...params, safeLimit, safeOffset);
 
     return rows.map(mapIncidentRow);
   },
@@ -209,7 +212,10 @@ export const persistenceService = {
       return db.prepare('SELECT * FROM incidents WHERE id = ?').get(incidentId);
     });
 
-    return mapIncidentRow(insertTx());
+    const result = mapIncidentRow(insertTx());
+    cacheService.invalidatePrefix('countries:');
+    cacheService.invalidatePrefix('dashboard:stats');
+    return result;
   },
 
   updateIncident(id, updates) {
@@ -310,7 +316,10 @@ export const persistenceService = {
       return db.prepare('SELECT * FROM incidents WHERE id = ?').get(id);
     });
 
-    return mapIncidentRow(updateTx());
+    const result = mapIncidentRow(updateTx());
+    cacheService.invalidatePrefix('countries:');
+    cacheService.invalidatePrefix('dashboard:stats');
+    return result;
   },
 
   deleteIncident(id) {
@@ -330,6 +339,8 @@ export const persistenceService = {
     });
 
     deleteTx();
+    cacheService.invalidatePrefix('countries:');
+    cacheService.invalidatePrefix('dashboard:stats');
     return { deleted: true, id };
   },
 
@@ -374,6 +385,8 @@ export const persistenceService = {
     });
 
     syncTx(incomingAlerts);
+    cacheService.invalidatePrefix('countries:');
+    cacheService.invalidatePrefix('dashboard:stats');
     return this.getAllAlerts();
   },
 
@@ -411,7 +424,10 @@ export const persistenceService = {
       return db.prepare('SELECT * FROM alerts WHERE id = ?').get(id);
     });
 
-    return mapAlertRow(updateTx());
+    const result = mapAlertRow(updateTx());
+    cacheService.invalidatePrefix('countries:');
+    cacheService.invalidatePrefix('dashboard:stats');
+    return result;
   },
 
   // ==========================================

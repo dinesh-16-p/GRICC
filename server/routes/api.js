@@ -489,10 +489,12 @@ router.get('/activities', (req, res, next) => {
   }
 });
 
-// 14. GET /api/stats
-router.get('/stats', (req, res, next) => {
+// 14. GET /api/stats (Cached with 10s TTL, invalidated on write)
+router.get('/stats', async (req, res, next) => {
   try {
-    const stats = persistenceService.getDashboardStats();
+    const stats = await cacheService.getOrSet('dashboard:stats', 10000, () =>
+      persistenceService.getDashboardStats()
+    );
     res.status(200).json({
       timestamp: new Date().toISOString(),
       stats,

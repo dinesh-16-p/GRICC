@@ -120,3 +120,4 @@ describe('Backup Authenticated Encryption (AES-256-GCM) Tests', () => {
     ).rejects.toThrow(/authentication tag verification failed/);
   });
 });
+

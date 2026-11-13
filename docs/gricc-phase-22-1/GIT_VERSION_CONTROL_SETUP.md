@@ -93,3 +93,4 @@ A thorough inspection of Git status and committed tree confirmed:
 - No `server/data/gricc.db` or SQLite binaries committed.
 - No `server/backups/` files committed.
 - No `node_modules/` or `dist/` directories committed.
+

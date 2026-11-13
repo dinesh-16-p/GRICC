@@ -86,3 +86,4 @@ To enable offsite replication in production:
    # Decrypt and restore to staging
    node server/scripts/backup-database.js --restore="gricc-backup.db.enc" --key="$BACKUP_ENCRYPTION_KEY"
    ```
+

@@ -727,6 +727,9 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_intel_alerts_status_sev ON intelligence_alerts(status, severity, id DESC);
     CREATE INDEX IF NOT EXISTS idx_collab_tasks_status_due ON investigation_tasks(status, due_date);
     CREATE INDEX IF NOT EXISTS idx_sec_events_type_created ON security_events(event_type, created_at DESC);
+
+    -- Phase 23: Expression Index for Fast O(1) B-tree Country Risk Snapshots Lookups
+    CREATE INDEX IF NOT EXISTS idx_country_snapshots_lower_id ON country_risk_snapshots(LOWER(country), id DESC);
   `);
 
   // Safe column migrations for Phase 18 (preserves all existing user & audit data)

@@ -132,3 +132,4 @@ Comprehensive automated tests are located in [tests/backup-encryption.test.js](f
 3. **Encrypted Backup File Creation:** Confirms file format begins with `GRICCBKP` magic header and is created with `.db.enc` extension.
 4. **End-to-End Database Restoration:** Creates encrypted backup of active database, restores it to temporary target, and verifies SQLite integrity check passes (`ok`).
 5. **Corrupted / Invalid Key Restoration Abort:** Verifies that restoration with an invalid key leaves the target database intact and throws an explicit authentication rejection error.
+

@@ -224,6 +224,30 @@ export const countryRiskService = {
     const alertRows = db.prepare('SELECT * FROM alerts ORDER BY updated_at DESC').all();
     const watchRows = db.prepare('SELECT country FROM watchlists').all();
 
+    // Fetch snapshot history for all monitored countries in a single query (eliminates N+1 query loop)
+    const snapshotRows = db
+      .prepare(`
+        SELECT id, country, score, classification, active_incidents, critical_alerts, calculated_at
+        FROM (
+          SELECT id, country, score, classification, active_incidents, critical_alerts, calculated_at,
+                 ROW_NUMBER() OVER (PARTITION BY LOWER(country) ORDER BY id DESC) as rn
+          FROM country_risk_snapshots
+        )
+        WHERE rn <= 12
+      `)
+      .all();
+
+    const snapshotsByCountry = new Map();
+    for (const s of snapshotRows) {
+      const c = s.country?.toLowerCase();
+      if (c) {
+        if (!snapshotsByCountry.has(c)) {
+          snapshotsByCountry.set(c, []);
+        }
+        snapshotsByCountry.get(c).push(s);
+      }
+    }
+
     const countrySet = new Set(Object.keys(COUNTRY_COORDINATES));
     incidentRows.forEach((r) => r.country && countrySet.add(r.country));
     alertRows.forEach((r) => r.country && r.country !== 'Global' && r.country !== 'Global Theatre' && countrySet.add(r.country));
@@ -233,11 +257,7 @@ export const countryRiskService = {
     for (const country of Array.from(countrySet).sort()) {
       const inc = incidentRows.filter((r) => r.country?.toLowerCase() === country.toLowerCase()).map(mapIncident);
       const alt = alertRows.filter((r) => r.country?.toLowerCase() === country.toLowerCase()).map(mapAlert);
-      const snaps = db
-        .prepare(
-          'SELECT id, score, classification, active_incidents, critical_alerts, calculated_at FROM country_risk_snapshots WHERE LOWER(country) = LOWER(?) ORDER BY id DESC LIMIT 12'
-        )
-        .all(country);
+      const snaps = snapshotsByCountry.get(country.toLowerCase()) || [];
 
       profiles.push(computeCountryScore(country, inc, alt, snaps));
     }
