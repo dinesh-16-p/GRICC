@@ -97,3 +97,4 @@ GRICC 2.0 does not require expensive commercial subscriptions to operate in prod
 - [ ] DigitalOcean Droplet created and accessible via SSH. *(BLOCKED BY INFRASTRUCTURE)*
 - [ ] Domain `griccnexus.com` registered and DNS A/CNAME records pointed to VPS IP. *(BLOCKED BY INFRASTRUCTURE)*
 - [ ] Let's Encrypt TLS certificate issued for `griccnexus.com` and `www.griccnexus.com`. *(BLOCKED BY INFRASTRUCTURE)*
+

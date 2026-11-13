@@ -148,3 +148,4 @@ To enable offsite backup synchronization:
 | Cloud Droplet | `BLOCKED BY MISSING INFRASTRUCTURE` | Operator create DigitalOcean Droplet |
 | DNS Records | `BLOCKED BY MISSING INFRASTRUCTURE` | Configure A / CNAME in registrar |
 | SSL / TLS Certificates | `BLOCKED BY MISSING INFRASTRUCTURE` | Issue via Certbot on live droplet |
+

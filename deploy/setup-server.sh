@@ -52,10 +52,23 @@ if [ -f /root/.ssh/authorized_keys ]; then
 fi
 
 # Configure sudoers for automated Nginx reload without interactive password prompt
-cat << 'EOF' > /etc/sudoers.d/gricc-deploy
-gricc ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t, /bin/systemctl reload nginx, /bin/systemctl restart nginx
+# Hardened to canonical systemctl binary path (/usr/bin/systemctl and /bin/systemctl compatibility)
+# Validated with visudo -cf before installation to prevent syntax errors
+echo "Installing hardened sudoers rule for Nginx management..."
+SUDOERS_TMP=$(mktemp)
+cat << 'EOF' > "$SUDOERS_TMP"
+gricc ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t, /usr/bin/systemctl reload nginx, /usr/bin/systemctl restart nginx, /bin/systemctl reload nginx, /bin/systemctl restart nginx
 EOF
-chmod 440 /etc/sudoers.d/gricc-deploy
+
+if visudo -cf "$SUDOERS_TMP"; then
+    install -m 0440 -o root -g root "$SUDOERS_TMP" /etc/sudoers.d/gricc-deploy
+    echo "Validated and installed /etc/sudoers.d/gricc-deploy successfully."
+else
+    echo "FATAL: Generated sudoers file failed visudo syntax validation!" >&2
+    rm -f "$SUDOERS_TMP"
+    exit 1
+fi
+rm -f "$SUDOERS_TMP"
 
 # 5. Install Node.js 24 LTS via NodeSource
 echo "[5/8] Installing Node.js 24 LTS..."
