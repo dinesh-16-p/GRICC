@@ -135,7 +135,7 @@ export default function AIIntelligenceAssistant({ canModify = false, isAdmin = f
 
     try {
       const res = await apiService.sendAiChat({
-        conversationId: activeConvId,
+        conversationId: activeConvId || undefined,
         message: text,
       });
       if (!activeConvId) {

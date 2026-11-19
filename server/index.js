@@ -78,7 +78,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         imgSrc: [
           "'self'",
           'data:',
@@ -100,7 +100,7 @@ app.use(
           'https://eonet.gsfc.nasa.gov',
           'https://raw.githubusercontent.com',
         ],
-        fontSrc: ["'self'", 'data:'],
+        fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: null,
       },

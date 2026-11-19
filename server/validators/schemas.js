@@ -51,8 +51,8 @@ export const updateIncidentSchema = z.object({
 
 export const aiChatSchema = z.object({
   message: z.string().min(1, 'Message text is required').max(4000, 'Message cannot exceed 4000 characters'),
-  conversationId: z.string().max(100).optional(),
-  country: z.string().max(100).optional(),
+  conversationId: z.string().max(100).nullish(),
+  country: z.string().max(100).nullish(),
 });
 
 export const aiGenerateReportSchema = z.object({
