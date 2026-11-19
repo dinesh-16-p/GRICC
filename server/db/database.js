@@ -1101,8 +1101,26 @@ function seedInitialUsersIfEmpty() {
           email: 'viewer@gricc.intel',
           fullName: 'Julian Thorne',
           department: 'Executive Oversight Briefings',
-          passwordHash: bcrypt.hashSync(viewerPass, 10),
+          passwordHash: bcrypt.hashSync('DemoViewer2026!', 10),
           role: 'VIEWER',
+        },
+        {
+          id: 'USR-DEMO-001',
+          username: 'demo_admin',
+          email: 'demo_admin@gricc.intel',
+          fullName: 'Command Administrator',
+          department: 'Command & Security Governance',
+          passwordHash: bcrypt.hashSync('DemoAdmin2026!', 10),
+          role: 'ADMIN',
+        },
+        {
+          id: 'USR-DEMO-002',
+          username: 'demo_analyst',
+          email: 'demo_analyst@gricc.intel',
+          fullName: 'Intelligence Analyst',
+          department: 'Global Threat Analysis Unit',
+          passwordHash: bcrypt.hashSync('DemoAnalyst2026!', 10),
+          role: 'ANALYST',
         },
       ];
 

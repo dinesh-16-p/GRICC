@@ -93,6 +93,7 @@ app.use(
         ],
         connectSrc: [
           "'self'",
+          'https://*.onrender.com',
           'https://api.maptiler.com',
           'https://*.maptiler.com',
           'https://gibs.earthdata.nasa.gov',
@@ -117,6 +118,7 @@ const allowedOrigins = Array.from(
     ...configuredOrigins,
     `http://localhost:${PORT}`,
     `http://127.0.0.1:${PORT}`,
+    ...(process.env.RENDER_EXTERNAL_URL ? [process.env.RENDER_EXTERNAL_URL.trim()] : []),
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim()] : []),
     ...(!isProduction ? [FRONTEND_URL, 'http://localhost:3000', 'http://127.0.0.1:3000'] : []),
   ])
@@ -129,11 +131,11 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      // Allow same-host origin on any port in development or demo mode, and public preview tunnels
-      if (!isProduction || process.env.SERVE_FRONTEND === 'true') {
+      // Allow same-host origin on any port in development or demo mode, and public preview tunnels/Render
+      if (!isProduction || process.env.SERVE_FRONTEND === 'true' || fs.existsSync(path.resolve('./dist/index.html'))) {
         if (
           /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
-          /^https?:\/\/[a-z0-9-]+\.(app\.lhr\.life|lhr\.life|trycloudflare\.com|loca\.lt)$/i.test(origin)
+          /^https?:\/\/[a-z0-9-]+\.(app\.lhr\.life|lhr\.life|trycloudflare\.com|loca\.lt|onrender\.com)$/i.test(origin)
         ) {
           return callback(null, true);
         }
@@ -193,12 +195,12 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api', apiRouter);
 
-// Serve production frontend bundle from dist/ if enabled or in production with built assets
+// Serve production frontend bundle from dist/ if enabled or whenever dist/index.html exists
 const distDir = path.resolve('./dist');
 const indexHtmlPath = path.join(distDir, 'index.html');
 const shouldServeFrontend =
   process.env.SERVE_FRONTEND === 'true' ||
-  (isProduction && process.env.STANDALONE_EXPRESS_FRONTEND === 'true' && fs.existsSync(indexHtmlPath));
+  fs.existsSync(indexHtmlPath);
 
 if (shouldServeFrontend && fs.existsSync(distDir)) {
   app.use(express.static(distDir, { index: false, dotfiles: 'ignore' }));
