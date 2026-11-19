@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="griccGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" fill="#030712" stroke="url(#griccGrad)" stroke-width="4" />
+  <circle cx="50" cy="50" r="32" fill="none" stroke="#0e7490" stroke-width="1.5" stroke-dasharray="4 2" />
+  <circle cx="50" cy="50" r="18" fill="none" stroke="#06b6d4" stroke-width="1.5" />
+  <path d="M50 4 L50 96 M4 50 L96 50" stroke="#0e7490" stroke-width="1" opacity="0.6" />
+  <circle cx="50" cy="50" r="4" fill="#22d3ee" />
+</svg>
+

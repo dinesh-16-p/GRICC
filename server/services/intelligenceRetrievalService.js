@@ -6,11 +6,21 @@ import { advancedAnalyticsService } from './advancedAnalyticsService.js';
 import { geospatialService } from './geospatialService.js';
 
 const INJECTION_PATTERNS = [
-  /ignore\s+(all\s+)?(previous|prior|above)\s+instructions/i,
-  /disregard\s+(system|developer)\s+prompt/i,
-  /override\s+(rbac|permissions|risk\s+score)/i,
-  /reveal\s+(api[_\s]?key|jwt[_\s]?secret|password|credentials)/i,
-  /execute\s+(sql|drop\s+table|delete\s+from|update\s+incidents)/i,
+  // 1. Direct instruction override & prompt reset
+  /\b(ignore|disregard|forget|bypass|reset|drop)\s+(all\s+)?(previous|prior|above|system|developer)?\s*(instructions|prompts?|rules?|guardrails?)\b/i,
+  /\b(disregard|ignore|bypass)\s+(the\s+)?(system|developer)\s+(prompt|instructions?|rules?)\b/i,
+  /\b(system\s+override|developer\s+override)\b/i,
+
+  // 2. Secret & credential extraction attempts
+  /\b(reveal|show|print|dump|extract|display|leak|give\s+me)\s*[:,\s]+(me\s+)?(the\s+|our\s+|all\s+|your\s+)?(admin\s+)?(api[_\s-]?keys?|jwt[_\s-]?secrets?|passwords?|credentials?|secret[_\s-]?keys?|environment\s+variables?|env[_\s-]?vars?|system\s+prompts?)\b/i,
+  /\bwhat\s+is\s+(the\s+|our\s+)?(api[_\s-]?key|jwt[_\s-]?secret|admin\s+password|master\s+password)\b/i,
+
+  // 3. Privilege escalation & RBAC manipulation
+  /\b(override|bypass|escalate|elevate|modify)\s+(the\s+)?(admin\s+)?(rbac|permissions?|user\s+roles?|access\s+controls?|risk\s+scores?)\b/i,
+
+  // 4. SQL injection & destructive command probes
+  /\bexecute\s+(sql|drop\s+table|delete\s+from|update\s+incidents)\b/i,
+  /\bunion\s+select\s+/i,
 ];
 
 export function detectPromptInjection(text) {

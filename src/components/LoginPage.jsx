@@ -12,27 +12,25 @@ import {
 } from 'lucide-react';
 
 export default function LoginPage({ onLogin, sessionMessage = null }) {
-  const [identifier, setIdentifier] = useState('dpillay851@gmail.com');
-  const [password, setPassword] = useState('admin123');
+  const [identifier, setIdentifier] = useState('viewer');
+  const [password, setPassword] = useState('DemoViewer2026!');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const quickAccounts = [
-    { label: 'Dinesh Pillay', id: 'dpillay851@gmail.com', role: 'ADMIN', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
-    { label: 'Command Operator', id: 'operator@gricc.intel', role: 'ADMIN', badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
-    { label: 'Marcus Vance', id: 'admin@gricc.intel', role: 'ADMIN', badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
-    { label: 'Elena Rostova', id: 'analyst@gricc.intel', role: 'ANALYST', badge: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-    { label: 'Julian Thorne', id: 'viewer@gricc.intel', role: 'VIEWER', badge: 'bg-slate-500/20 text-slate-300 border-slate-500/40' },
+    { label: 'Public Demo Viewer (Read-Only)', id: 'viewer', pass: 'DemoViewer2026!', role: 'VIEWER', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+    { label: 'Intelligence Analyst', id: 'demo_analyst', pass: 'DemoAnalyst2026!', role: 'ANALYST', badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
+    { label: 'Command Administrator', id: 'demo_admin', pass: 'DemoAdmin2026!', role: 'ADMIN', badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
   ];
 
-  const handleQuickLogin = async (accId) => {
-    setIdentifier(accId);
-    setPassword('admin123');
+  const handleQuickLogin = async (acc) => {
+    setIdentifier(acc.id);
+    setPassword(acc.pass);
     setError('');
     setIsSubmitting(true);
     try {
-      await onLogin(accId, 'admin123');
+      await onLogin(acc.id, acc.pass);
     } catch (err) {
       setError(err?.message || 'Authentication failed.');
     } finally {
@@ -188,8 +186,8 @@ export default function LoginPage({ onLogin, sessionMessage = null }) {
           {/* 1-Click Fast Dev Sign-In Selector */}
           <div className="pt-4 border-t border-navy-800 space-y-2.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-mono uppercase tracking-wider text-slate-400 font-bold">1-Click Fast Access</span>
-              <span className="font-mono text-[10px] text-cyan-400">Password: admin123</span>
+              <span className="font-mono uppercase tracking-wider text-slate-400 font-bold">1-Click Demo Sign-In</span>
+              <span className="font-mono text-[10px] text-cyan-400">Isolated Demo Accounts</span>
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {quickAccounts.map((acc) => (
@@ -197,7 +195,7 @@ export default function LoginPage({ onLogin, sessionMessage = null }) {
                   key={acc.id}
                   type="button"
                   disabled={isSubmitting}
-                  onClick={() => handleQuickLogin(acc.id)}
+                  onClick={() => handleQuickLogin(acc)}
                   className="flex items-center justify-between px-3 py-2 rounded-lg bg-navy-950/70 hover:bg-navy-800 border border-navy-700/60 hover:border-cyan-500/50 text-xs transition-all text-left"
                 >
                   <div className="flex items-center gap-2 min-w-0">

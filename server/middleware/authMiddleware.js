@@ -3,23 +3,14 @@ import authService from '../services/authService.js';
 import securityService from '../services/securityService.js';
 
 function getDefaultOperatorUser() {
-  try {
-    const row = db
-      .prepare(
-        "SELECT id, username, email, full_name AS fullName, department, role FROM users WHERE is_active = 1 ORDER BY CASE role WHEN 'ADMIN' THEN 1 WHEN 'ANALYST' THEN 2 ELSE 3 END LIMIT 1"
-      )
-      .get();
-    if (row) return row;
-  } catch {
-    // Fallback if DB is not yet seeded
-  }
+  // Safe read-only fallback: NEVER grant ADMIN privileges to unauthenticated visitors
   return {
-    id: 'USR-001',
-    username: 'admin',
-    email: 'admin@gricc.intel',
-    fullName: 'Command Operator',
-    department: 'Command & Security Governance',
-    role: 'ADMIN',
+    id: 'USR-003',
+    username: 'viewer',
+    email: 'viewer@gricc.intel',
+    fullName: 'Demo Viewer',
+    department: 'External Operations',
+    role: 'VIEWER',
   };
 }
 
@@ -47,6 +38,18 @@ function validateCsrfIfCookieAuth(req) {
 }
 
 /**
+ * Check if the active runtime environment explicitly permits unauthenticated operator fallback.
+ * Operator fallback is strictly restricted to development mode (NODE_ENV === 'development').
+ * In production, testing, or any environment where NODE_ENV is unset, fallback is completely blocked.
+ */
+function isDevOperatorFallbackAllowed() {
+  return (
+    process.env.NODE_ENV === 'development' &&
+    process.env.ALLOW_DEV_OPERATOR_FALLBACK === 'true'
+  );
+}
+
+/**
  * Middleware: Resolve Bearer JWT token or HttpOnly session cookie; otherwise allow access as default operator in dev.
  */
 export function authenticateToken(req, res, next) {
@@ -67,6 +70,13 @@ export function authenticateToken(req, res, next) {
   }
 
   if (!token) {
+    if (!isDevOperatorFallbackAllowed()) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        code: 'TOKEN_MISSING',
+        message: 'Authentication required. No session token provided.',
+      });
+    }
     req.user = getDefaultOperatorUser();
     return next();
   }
@@ -77,7 +87,7 @@ export function authenticateToken(req, res, next) {
     req.tokenJti = session.jti;
     next();
   } catch (err) {
-    if (process.env.NODE_ENV === 'production') {
+    if (!isDevOperatorFallbackAllowed()) {
       return res.status(401).json({
         error: err.name || 'Unauthorized',
         code: err.code || 'TOKEN_INVALID',
@@ -101,6 +111,13 @@ export function authenticateSse(req, res, next) {
   const token = headerToken || queryToken || cookieToken;
 
   if (!token) {
+    if (!isDevOperatorFallbackAllowed()) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        code: 'TOKEN_MISSING',
+        message: 'Authentication required for SSE stream.',
+      });
+    }
     req.user = getDefaultOperatorUser();
     return next();
   }
@@ -110,7 +127,14 @@ export function authenticateSse(req, res, next) {
     req.user = session.user;
     req.tokenJti = session.jti;
     next();
-  } catch {
+  } catch (err) {
+    if (!isDevOperatorFallbackAllowed()) {
+      return res.status(401).json({
+        error: err?.name || 'Unauthorized',
+        code: err?.code || 'TOKEN_INVALID',
+        message: err?.message || 'Invalid SSE authentication token.',
+      });
+    }
     req.user = getDefaultOperatorUser();
     next();
   }

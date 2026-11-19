@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
@@ -73,6 +74,36 @@ if (isProduction || process.env.TRUST_PROXY === 'true') {
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://api.maptiler.com',
+          'https://*.maptiler.com',
+          'https://gibs.earthdata.nasa.gov',
+          'https://*.basemaps.cartocdn.com',
+          'https://*.tile.openstreetmap.org',
+          'https://*.openstreetmap.org',
+          'https://unpkg.com',
+        ],
+        connectSrc: [
+          "'self'",
+          'https://api.maptiler.com',
+          'https://*.maptiler.com',
+          'https://gibs.earthdata.nasa.gov',
+          'https://eonet.gsfc.nasa.gov',
+          'https://raw.githubusercontent.com',
+        ],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: null,
+      },
+    },
   })
 );
 
@@ -84,6 +115,8 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
 const allowedOrigins = Array.from(
   new Set([
     ...configuredOrigins,
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim()] : []),
     ...(!isProduction ? [FRONTEND_URL, 'http://localhost:3000', 'http://127.0.0.1:3000'] : []),
   ])
@@ -95,6 +128,15 @@ app.use(
       // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
+      }
+      // Allow same-host origin on any port in development or demo mode, and public preview tunnels
+      if (!isProduction || process.env.SERVE_FRONTEND === 'true') {
+        if (
+          /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+          /^https?:\/\/[a-z0-9-]+\.(app\.lhr\.life|lhr\.life|trycloudflare\.com|loca\.lt)$/i.test(origin)
+        ) {
+          return callback(null, true);
+        }
       }
       return callback(new Error(`CORS policy: Origin ${origin} not allowed`));
     },
@@ -124,22 +166,23 @@ app.use(express.urlencoded({ extended: true, limit: '512kb' }));
 
 // Request logging, no-store cache headers on /api, & performance telemetry
 app.use((req, res, next) => {
-  if (req.originalUrl.startsWith('/api/')) {
+  const cleanPath = req.path || req.originalUrl.split('?')[0];
+  if (cleanPath.startsWith('/api/')) {
     res.setHeader('Cache-Control', 'no-store');
   }
   const start = performance.now();
   res.on('finish', () => {
     const duration = performance.now() - start;
-    if (req.originalUrl.startsWith('/api/')) {
+    if (cleanPath.startsWith('/api/')) {
       performanceService.recordApiRequest({
         method: req.method,
-        path: req.originalUrl,
+        path: cleanPath,
         statusCode: res.statusCode,
         durationMs: duration,
       });
     }
     if (process.env.NODE_ENV !== 'test') {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration.toFixed(1)}ms`);
+      console.log(`[${new Date().toISOString()}] ${req.method} ${cleanPath} ${res.statusCode} - ${duration.toFixed(1)}ms`);
     }
   });
   next();
@@ -150,21 +193,61 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api', apiRouter);
 
-// Root informational endpoint
-app.get('/', (req, res) => {
-  res.json({
-    name: 'GRICC Intelligence API Gateway',
-    version: '1.0.0',
-    status: 'ONLINE',
-    endpoints: {
-      health: '/api/health',
-      sources: '/api/sources',
-      telemetry: '/api/telemetry',
-      refresh: '/api/refresh',
-    },
-    timestamp: new Date().toISOString(),
+// Serve production frontend bundle from dist/ if enabled or in production with built assets
+const distDir = path.resolve('./dist');
+const indexHtmlPath = path.join(distDir, 'index.html');
+const shouldServeFrontend =
+  process.env.SERVE_FRONTEND === 'true' ||
+  (isProduction && process.env.STANDALONE_EXPRESS_FRONTEND === 'true' && fs.existsSync(indexHtmlPath));
+
+if (shouldServeFrontend && fs.existsSync(distDir)) {
+  app.use(express.static(distDir, { index: false, dotfiles: 'ignore' }));
+
+  app.get('/', (req, res) => {
+    if (fs.existsSync(indexHtmlPath)) {
+      return res.sendFile(indexHtmlPath);
+    }
+    res.json({
+      name: 'GRICC Intelligence API Gateway',
+      version: '1.0.0',
+      status: 'ONLINE',
+      endpoints: {
+        health: '/api/health',
+        sources: '/api/sources',
+        telemetry: '/api/telemetry',
+        refresh: '/api/refresh',
+      },
+      timestamp: new Date().toISOString(),
+    });
   });
-});
+
+  // SPA fallback for frontend routes (excluding /api)
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api')) {
+      return next();
+    }
+    if (fs.existsSync(indexHtmlPath)) {
+      return res.sendFile(indexHtmlPath);
+    }
+    next();
+  });
+} else {
+  // Root informational endpoint
+  app.get('/', (req, res) => {
+    res.json({
+      name: 'GRICC Intelligence API Gateway',
+      version: '1.0.0',
+      status: 'ONLINE',
+      endpoints: {
+        health: '/api/health',
+        sources: '/api/sources',
+        telemetry: '/api/telemetry',
+        refresh: '/api/refresh',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  });
+}
 
 // 5. 404 Handler
 app.use((req, res) => {

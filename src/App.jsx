@@ -47,18 +47,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Default local operator context (Phase 8 login gate removed per user request)
-  const DEFAULT_OPERATOR_USER = {
-    id: 'USR-005',
-    username: 'dpillay851',
-    email: 'dpillay851@gmail.com',
-    fullName: 'Dinesh Pillay',
-    department: 'Command & Security Governance',
-    role: 'ADMIN',
-  };
-
-  const [currentUser, setCurrentUser] = useState(DEFAULT_OPERATOR_USER);
-  const [isAuthChecking, setIsAuthChecking] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(() => {
+    return typeof window !== 'undefined' && Boolean(getAuthToken());
+  });
   const [sessionMessage, setSessionMessage] = useState(null);
 
   const userRole = currentUser?.role || 'VIEWER';
@@ -395,6 +387,7 @@ export default function App() {
   useEffect(() => {
     const token = getAuthToken();
     if (token) {
+      setIsAuthChecking(true);
       apiService
         .getCurrentUser()
         .then((res) => {
@@ -402,12 +395,31 @@ export default function App() {
             setCurrentUser(res.user);
           } else {
             clearAuthToken();
+            setCurrentUser(null);
           }
         })
         .catch(() => {
           clearAuthToken();
+          setCurrentUser(null);
+        })
+        .finally(() => {
+          setIsAuthChecking(false);
         });
+    } else {
+      setIsAuthChecking(false);
     }
+
+    const handleSessionExpired = (event) => {
+      clearAuthToken();
+      setCurrentUser(null);
+      setSessionMessage(event.detail?.message || 'Your session has expired. Please log in again.');
+      setActiveTab('dashboard');
+    };
+
+    window.addEventListener('gricc:session-expired', handleSessionExpired);
+    return () => {
+      window.removeEventListener('gricc:session-expired', handleSessionExpired);
+    };
   }, []);
 
   // Load persisted data and telemetry once authenticated
@@ -428,7 +440,7 @@ export default function App() {
     const streamUrl = apiService.getEventStreamUrl();
     if (!streamUrl) return;
 
-    const es = new EventSource(streamUrl);
+    const es = new EventSource(streamUrl, { withCredentials: true });
 
     es.addEventListener('connected', () => {
       setSseConnected(true);
@@ -642,9 +654,14 @@ export default function App() {
   };
 
   const handleLogout = async () => {
-    await apiService.logout();
-    setCurrentUser(DEFAULT_OPERATOR_USER);
-    setSessionMessage(null);
+    try {
+      await apiService.logout();
+    } catch {
+      // non-fatal
+    }
+    clearAuthToken();
+    setCurrentUser(null);
+    setSessionMessage('You have been logged out.');
     setActiveTab('dashboard');
   };
 
@@ -867,6 +884,7 @@ export default function App() {
                   stats={stats}
                   alerts={alerts}
                   incidents={incidents}
+                  liveEvents={liveDisasterEvents}
                   countryProfiles={countryProfiles}
                   operationalMode={operationalMode}
                   onNavigate={(tab) => setActiveTab(tab)}

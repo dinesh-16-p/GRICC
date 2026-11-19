@@ -11,52 +11,126 @@ import {
   MapPin,
   ExternalLink,
   Layers,
+  Flame,
+  CloudLightning,
+  Radio,
+  Satellite,
+  Compass,
 } from 'lucide-react';
 
 /**
- * Simplified world continent polygon outlines for 3D sphere rendering.
- * Coordinates in [longitude, latitude] degrees.
+ * Detailed world continent & island polygon coordinates for realistic 3D globe rendering.
+ * Coordinates are in [longitude, latitude] degrees.
  */
-const CONTINENTS = [
-  // North America
+const DETAILED_CONTINENTS = [
+  // 1. North America
   [
-    [-168, 65], [-160, 71], [-130, 70], [-95, 72], [-82, 63], [-62, 60], [-55, 48],
-    [-70, 42], [-75, 35], [-80, 25], [-87, 21], [-97, 26], [-105, 23], [-117, 32],
-    [-124, 40], [-124, 48], [-135, 56], [-152, 58], [-168, 65],
+    [-168, 65], [-162, 70], [-150, 71], [-130, 70], [-115, 69], [-95, 72], [-82, 63],
+    [-84, 55], [-78, 52], [-65, 58], [-55, 48], [-64, 44], [-70, 42], [-76, 35],
+    [-81, 25], [-82, 28], [-88, 30], [-97, 26], [-97, 21], [-90, 19], [-87, 21],
+    [-83, 10], [-79, 8], [-84, 10], [-92, 14], [-105, 20], [-110, 23], [-115, 30],
+    [-118, 34], [-124, 40], [-124, 48], [-132, 54], [-140, 59], [-153, 58], [-160, 55],
+    [-166, 60], [-168, 65],
   ],
-  // South America
+  // 2. Greenland
   [
-    [-77, 8], [-60, 8], [-50, -1], [-35, -5], [-37, -12], [-41, -21], [-50, -30],
-    [-57, -38], [-65, -47], [-68, -55], [-75, -50], [-72, -40], [-71, -30], [-80, -5],
-    [-77, 8],
+    [-44, 60], [-35, 65], [-20, 70], [-18, 77], [-28, 82], [-50, 82], [-60, 78],
+    [-55, 70], [-44, 60],
   ],
-  // Europe & Asia (Eurasia)
+  // 3. South America
   [
-    [-9, 38], [-9, 43], [0, 43], [4, 52], [8, 55], [12, 57], [20, 60], [28, 70],
-    [40, 68], [60, 70], [80, 73], [105, 77], [130, 73], [160, 70], [178, 65],
-    [165, 60], [140, 50], [130, 40], [120, 32], [108, 22], [100, 15], [90, 22],
-    [80, 13], [70, 22], [60, 25], [50, 30], [35, 32], [28, 41], [15, 40], [2, 49],
-    [-4, 48], [-9, 38],
+    [-77, 8], [-68, 12], [-60, 9], [-50, -1], [-35, -5], [-35, -10], [-39, -15],
+    [-43, -22], [-48, -28], [-56, -34], [-65, -42], [-67, -54], [-75, -52], [-74, -44],
+    [-71, -30], [-76, -15], [-81, -5], [-80, 2], [-77, 8],
   ],
-  // Africa
+  // 4. Europe
   [
-    [-17, 15], [-5, 36], [10, 37], [25, 32], [32, 31], [43, 12], [51, 11], [42, -5],
-    [35, -20], [28, -32], [18, -34], [12, -18], [9, 4], [0, 6], [-12, 5], [-17, 15],
+    [-9, 37], [-9, 43], [0, 43], [-1, 46], [-5, 48], [2, 51], [8, 54], [10, 58],
+    [13, 56], [19, 54], [25, 59], [30, 60], [32, 70], [25, 71], [15, 68], [8, 63],
+    [5, 62], [5, 58], [2, 53], [0, 49], [3, 44], [9, 44], [14, 41], [18, 40],
+    [15, 38], [12, 38], [14, 44], [12, 45], [4, 44], [0, 41], [-5, 36], [-9, 37],
   ],
-  // Australia
+  // 5. United Kingdom & Ireland
   [
-    [114, -22], [122, -18], [135, -12], [142, -11], [148, -19], [153, -28], [150, -37],
-    [138, -35], [128, -32], [115, -34], [114, -22],
+    [-5, 50], [1, 52], [0, 55], [-2, 58], [-5, 58], [-5, 55], [-4, 52], [-5, 50],
   ],
-  // Antarctica (approximate rim)
+  // 6. Africa
   [
-    [-180, -78], [-120, -74], [-60, -68], [0, -70], [60, -68], [120, -72], [180, -78],
+    [-17, 15], [-17, 21], [-12, 28], [-5, 36], [10, 37], [25, 32], [32, 31], [35, 27],
+    [43, 12], [51, 11], [46, 5], [41, -4], [35, -20], [32, -28], [28, -33], [18, -34],
+    [14, -23], [12, -15], [9, 4], [4, 5], [0, 6], [-8, 4], [-12, 5], [-17, 15],
   ],
+  // 7. Madagascar
+  [
+    [44, -12], [50, -13], [50, -22], [47, -25], [43, -25], [44, -18], [44, -12],
+  ],
+  // 8. Asia & Siberia
+  [
+    [30, 60], [40, 68], [60, 70], [80, 73], [105, 77], [130, 73], [160, 70], [178, 65],
+    [170, 60], [160, 55], [142, 50], [132, 43], [129, 35], [122, 30], [118, 22],
+    [108, 16], [105, 10], [100, 4], [98, 10], [92, 21], [88, 22], [80, 13], [77, 8],
+    [72, 19], [68, 24], [62, 25], [56, 26], [50, 30], [40, 32], [36, 32], [34, 36],
+    [27, 41], [35, 42], [40, 47], [50, 47], [55, 55], [45, 58], [30, 60],
+  ],
+  // 9. Indian Subcontinent Focus
+  [
+    [68, 24], [72, 20], [76, 12], [78, 8], [80, 13], [85, 18], [88, 22], [85, 27],
+    [76, 30], [70, 28], [68, 24],
+  ],
+  // 10. Japan Arc
+  [
+    [130, 31], [135, 34], [141, 38], [142, 44], [145, 44], [141, 41], [136, 35], [130, 31],
+  ],
+  // 11. Southeast Asia & Indonesia
+  [
+    [95, 5], [105, -5], [115, -8], [122, -8], [120, -1], [110, 2], [100, 4], [95, 5],
+  ],
+  // 12. Australia
+  [
+    [114, -22], [122, -18], [132, -12], [142, -11], [148, -19], [153, -28], [150, -37],
+    [145, -39], [138, -35], [128, -32], [115, -34], [114, -28], [114, -22],
+  ],
+  // 13. New Zealand
+  [
+    [166, -46], [173, -42], [178, -38], [174, -36], [172, -40], [168, -44], [166, -46],
+  ],
+  // 14. Antarctica Rim
+  [
+    [-180, -78], [-130, -74], [-70, -68], [0, -70], [70, -68], [130, -72], [180, -78],
+  ],
+];
+
+/**
+ * Global city night lights for NASA Earth at Night nocturnal glow simulation.
+ * [lon, lat, intensity]
+ */
+const CITY_LIGHTS = [
+  [-74.0, 40.7, 1.0],   // New York
+  [-0.12, 51.5, 1.0],   // London
+  [2.35, 48.8, 0.9],    // Paris
+  [139.69, 35.68, 1.0], // Tokyo
+  [77.2, 28.6, 0.95],   // Delhi
+  [72.8, 19.0, 0.95],   // Mumbai
+  [121.4, 31.2, 1.0],   // Shanghai
+  [116.4, 39.9, 0.95],  // Beijing
+  [103.8, 1.35, 0.9],   // Singapore
+  [55.27, 25.2, 0.95],  // Dubai
+  [-118.2, 34.0, 0.9],  // Los Angeles
+  [-87.6, 41.8, 0.85],  // Chicago
+  [-46.6, -23.5, 0.9],  // Sao Paulo
+  [-58.3, -34.6, 0.85], // Buenos Aires
+  [151.2, -33.8, 0.85], // Sydney
+  [31.2, 30.0, 0.9],    // Cairo
+  [37.6, 55.7, 0.85],   // Moscow
+  [126.9, 37.5, 0.95],  // Seoul
+  [100.5, 13.7, 0.85],  // Bangkok
+  [18.4, -33.9, 0.8],   // Cape Town
 ];
 
 export default function InteractiveGlobe({
   locations = sampleLocations,
   incidents = [],
+  liveEvents = [],
   onSelectCountry,
   selectedCountry = null,
   height = 480,
@@ -65,47 +139,110 @@ export default function InteractiveGlobe({
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Rotation angles (radians)
-  const [rotX, setRotX] = useState(0.3); // Pitch
-  const [rotY, setRotY] = useState(1.4); // Yaw
-  const [zoom, setZoom] = useState(1.0);
-  const [isRotating, setIsRotating] = useState(true);
-  const [hoveredNode, setHoveredNode] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
+  // Mutable animation state in REFS to avoid triggering React re-render loops at 60Hz
+  const rotXRef = useRef(0.25); // Pitch (latitude tilt)
+  const rotYRef = useRef(1.4);  // Yaw (rotation longitude)
+  const zoomRef = useRef(1.0);
+  const isRotatingRef = useRef(true);
   const isDraggingRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
+  const mousePosRef = useRef({ x: 0, y: 0 });
   const animFrameRef = useRef(null);
+  const hoveredNodeRef = useRef(null);
 
-  // Merge locations with active incident coordinates
+  // UI States (only updated on deliberate user interaction)
+  const [isRotatingState, setIsRotatingState] = useState(true);
+  const [zoomDisplay, setZoomDisplay] = useState(1.0);
+  const [globeTheme, setGlobeTheme] = useState('nasa'); // 'nasa' | 'tactical'
+  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [hoveredNode, setHoveredNode] = useState(null);
+
+  // Keep refs synchronized with UI state
+  useEffect(() => {
+    isRotatingRef.current = isRotatingState;
+  }, [isRotatingState]);
+
+  // Aggregate nodes memoized cleanly
   const globeNodes = useMemo(() => {
-    const list = [...locations];
+    const list = [];
 
-    // Overlay real incident markers if available
-    incidents.forEach((inc) => {
-      if (inc.latitude && inc.longitude) {
+    // 1. Base Country Monitoring Sites
+    if (activeFilter === 'ALL' || activeFilter === 'COUNTRY') {
+      locations.forEach((loc) => {
         list.push({
-          id: `inc-${inc.id}`,
-          country: inc.country,
-          city: inc.location || inc.country,
-          coordinates: [inc.latitude, inc.longitude],
-          riskScore: inc.severity === 'Critical' ? 95 : inc.severity === 'High' ? 80 : 50,
-          riskClassification:
-            inc.severity === 'Critical'
-              ? RISK_LEVELS.HIGH
-              : inc.severity === 'High'
+          id: `loc-${loc.id || loc.country}`,
+          country: loc.country,
+          city: loc.city || loc.country,
+          coordinates: loc.coordinates,
+          riskScore: loc.riskScore || 50,
+          riskClassification: loc.riskClassification || RISK_LEVELS.MEDIUM,
+          riskCategory: loc.riskCategory || 'Geopolitical',
+          type: 'country',
+          source: 'GRICC Monitoring Index',
+        });
+      });
+    }
+
+    // 2. Real Stored Incidents
+    if (activeFilter === 'ALL' || activeFilter === 'INCIDENT') {
+      incidents.forEach((inc) => {
+        if (typeof inc.latitude === 'number' && typeof inc.longitude === 'number') {
+          list.push({
+            id: `inc-${inc.id}`,
+            country: inc.country,
+            city: inc.location || inc.country,
+            coordinates: [inc.latitude, inc.longitude],
+            riskScore: inc.severity === 'Critical' ? 95 : inc.severity === 'High' ? 80 : 55,
+            riskClassification:
+              inc.severity === 'Critical' || inc.severity === 'High'
                 ? RISK_LEVELS.HIGH
                 : RISK_LEVELS.MEDIUM,
-          riskCategory: inc.category,
-          isIncident: true,
-          severity: inc.severity,
-          title: inc.title,
+            riskCategory: inc.category || 'Incident',
+            type: 'incident',
+            severity: inc.severity,
+            title: inc.title,
+            source: 'Operational Incident DB',
+          });
+        }
+      });
+    }
+
+    // 3. Live NASA EONET Hazards & GitHub Threat Feeds
+    (liveEvents || []).forEach((ev, idx) => {
+      if (Array.isArray(ev.coordinates) && ev.coordinates.length === 2 && !isNaN(ev.coordinates[0])) {
+        const isNasa =
+          ev.source?.toLowerCase().includes('nasa') ||
+          ev.category?.toLowerCase().includes('wildfire') ||
+          ev.category?.toLowerCase().includes('storm') ||
+          ev.category?.toLowerCase().includes('volcano');
+        const isCyber =
+          ev.source?.toLowerCase().includes('github') ||
+          ev.source?.toLowerCase().includes('cisa') ||
+          ev.category?.toLowerCase().includes('cyber');
+
+        if (activeFilter === 'NASA' && !isNasa) return;
+        if (activeFilter === 'CYBER' && !isCyber) return;
+
+        list.push({
+          id: `live-ev-${idx}-${ev.id || idx}`,
+          country: ev.country || (isNasa ? 'NASA Global Observation' : 'Threat Intelligence Net'),
+          city: ev.title || 'Live Hazard',
+          coordinates: ev.coordinates,
+          riskScore: 92,
+          riskClassification: RISK_LEVELS.HIGH,
+          riskCategory: ev.category || (isNasa ? 'Natural Hazard' : 'Cyber IOC'),
+          type: isNasa ? 'nasa' : isCyber ? 'cyber' : 'hazard',
+          severity: ev.severity || 'Critical',
+          title: ev.title,
+          source: ev.source || (isNasa ? 'NASA EONET v3' : 'GitHub Threat Net'),
+          url: ev.url,
+          date: ev.date,
         });
       }
     });
 
     return list;
-  }, [locations, incidents]);
+  }, [locations, incidents, liveEvents, activeFilter]);
 
   // Convert 3D spherical coordinate (lon, lat) to 2D canvas coordinates
   const projectPoint = useCallback(
@@ -132,79 +269,103 @@ export default function InteractiveGlobe({
     []
   );
 
-  // Render loop
+  // Main 60FPS High-Performance Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let localRotY = rotY;
+    let activeHoverTracked = null;
 
     const render = () => {
-      // Auto-rotation when active and not dragging
-      if (isRotating && !isDraggingRef.current) {
-        localRotY += 0.003;
-        setRotY(localRotY);
+      // 1. Advance rotation without updating React state
+      if (isRotatingRef.current && !isDraggingRef.current) {
+        rotYRef.current += 0.002;
       }
 
       const width = canvas.width;
       const height = canvas.height;
+      if (width === 0 || height === 0) {
+        animFrameRef.current = requestAnimationFrame(render);
+        return;
+      }
+
       const centerX = width / 2;
       const centerY = height / 2;
-      const radius = (Math.min(width, height) / 2.3) * zoom;
+      const radius = (Math.min(width, height) / 2.3) * zoomRef.current;
+      const curRotX = rotXRef.current;
+      const curRotY = rotYRef.current;
+      const time = Date.now() / 1000;
+      const isNasaTheme = globeTheme === 'nasa';
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Atmospheric Outer Glow
-      const glowGrad = ctx.createRadialGradient(
+      // 2. Realistic Rayleigh Atmospheric Scattering Halo
+      const atmosphereGrad = ctx.createRadialGradient(
         centerX,
         centerY,
-        radius * 0.9,
+        radius * 0.94,
         centerX,
         centerY,
-        radius * 1.25
+        radius * 1.28
       );
-      glowGrad.addColorStop(0, 'rgba(0, 194, 255, 0.22)');
-      glowGrad.addColorStop(0.5, 'rgba(54, 214, 176, 0.08)');
-      glowGrad.addColorStop(1, 'rgba(8, 20, 38, 0)');
 
-      ctx.fillStyle = glowGrad;
+      if (isNasaTheme) {
+        atmosphereGrad.addColorStop(0, 'rgba(56, 189, 248, 0.40)'); // Vibrant cyan-blue ozone
+        atmosphereGrad.addColorStop(0.35, 'rgba(14, 165, 233, 0.18)'); // Mid-atmospheric haze
+        atmosphereGrad.addColorStop(0.75, 'rgba(3, 105, 161, 0.06)'); // Outer thermosphere
+        atmosphereGrad.addColorStop(1, 'rgba(2, 6, 23, 0)');
+      } else {
+        atmosphereGrad.addColorStop(0, 'rgba(0, 194, 255, 0.25)');
+        atmosphereGrad.addColorStop(0.5, 'rgba(54, 214, 176, 0.10)');
+        atmosphereGrad.addColorStop(1, 'rgba(8, 20, 38, 0)');
+      }
+
+      ctx.fillStyle = atmosphereGrad;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius * 1.25, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, radius * 1.28, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Globe Sphere (Deep Navy Gradient)
-      const sphereGrad = ctx.createRadialGradient(
+      // 3. Globe Sphere Base with Photorealistic Deep Oceans Gradient
+      const oceanGrad = ctx.createRadialGradient(
         centerX - radius * 0.35,
         centerY - radius * 0.35,
-        radius * 0.1,
+        radius * 0.05,
         centerX,
         centerY,
         radius
       );
-      sphereGrad.addColorStop(0, '#102A43'); // Navy Blue highlight
-      sphereGrad.addColorStop(0.65, '#0B192B'); // Dark Surface
-      sphereGrad.addColorStop(1, '#081426'); // Deep Navy border
+
+      if (isNasaTheme) {
+        oceanGrad.addColorStop(0, '#1a4971'); // Sunlit tropical blue highlight
+        oceanGrad.addColorStop(0.35, '#0e2f50'); // Deep ocean shelf
+        oceanGrad.addColorStop(0.75, '#07182c'); // Abyssal plain
+        oceanGrad.addColorStop(1, '#020b17'); // Planetary shadow limb
+      } else {
+        oceanGrad.addColorStop(0, '#102A43');
+        oceanGrad.addColorStop(0.65, '#0B192B');
+        oceanGrad.addColorStop(1, '#060e18');
+      }
 
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.clip(); // Restrict internal elements inside sphere
+      ctx.clip(); // Clip all subsequent drawings strictly inside the planetary sphere
 
-      ctx.fillStyle = sphereGrad;
+      ctx.fillStyle = oceanGrad;
       ctx.fill();
 
-      // 3. Graticule (Latitude & Longitude Grid Lines)
-      ctx.strokeStyle = 'rgba(27, 53, 82, 0.45)';
-      ctx.lineWidth = 1;
+      // 4. Photorealistic Graticule (Latitude & Longitude)
+      ctx.strokeStyle = isNasaTheme ? 'rgba(38, 100, 150, 0.25)' : 'rgba(27, 53, 82, 0.40)';
+      ctx.lineWidth = 0.8;
 
       // Parallels (Latitudes)
       for (let lat = -60; lat <= 60; lat += 30) {
         ctx.beginPath();
         let first = true;
         for (let lon = -180; lon <= 180; lon += 5) {
-          const pt = projectPoint(lon, lat, radius, centerX, centerY, rotX, localRotY);
+          const pt = projectPoint(lon, lat, radius, centerX, centerY, curRotX, curRotY);
           if (pt.z > 0) {
             if (first) {
               ctx.moveTo(pt.x, pt.y);
@@ -224,7 +385,7 @@ export default function InteractiveGlobe({
         ctx.beginPath();
         let first = true;
         for (let lat = -80; lat <= 80; lat += 5) {
-          const pt = projectPoint(lon, lat, radius, centerX, centerY, rotX, localRotY);
+          const pt = projectPoint(lon, lat, radius, centerX, centerY, curRotX, curRotY);
           if (pt.z > 0) {
             if (first) {
               ctx.moveTo(pt.x, pt.y);
@@ -239,18 +400,14 @@ export default function InteractiveGlobe({
         ctx.stroke();
       }
 
-      // 4. Continents & Landmass Vector Polygons
-      ctx.fillStyle = 'rgba(16, 42, 67, 0.85)'; // Navy Blue Landmass
-      ctx.strokeStyle = 'rgba(0, 194, 255, 0.35)'; // Cyan Shorelines
-      ctx.lineWidth = 1.2;
-
-      CONTINENTS.forEach((poly) => {
+      // 5. Detailed Realistic Continents with Coastal Shelf Shading
+      DETAILED_CONTINENTS.forEach((poly) => {
         ctx.beginPath();
         let first = true;
         let visibleCount = 0;
 
         poly.forEach(([lon, lat]) => {
-          const pt = projectPoint(lon, lat, radius, centerX, centerY, rotX, localRotY);
+          const pt = projectPoint(lon, lat, radius, centerX, centerY, curRotX, curRotY);
           if (pt.z > -0.1) {
             visibleCount++;
             if (first) {
@@ -266,88 +423,187 @@ export default function InteractiveGlobe({
 
         if (visibleCount > 2) {
           ctx.closePath();
+          // Landmass color
+          ctx.fillStyle = isNasaTheme ? 'rgba(24, 76, 52, 0.92)' : 'rgba(16, 42, 67, 0.85)';
           ctx.fill();
+
+          // Coastal shelf outline
+          ctx.strokeStyle = isNasaTheme ? 'rgba(52, 211, 153, 0.55)' : 'rgba(0, 194, 255, 0.40)';
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
       });
 
-      // 5. Monitoring Nodes & Threat Markers
-      const time = Date.now() / 1000;
-      let activeHover = null;
+      // 6. NASA Earth at Night Nocturnal City Lights
+      if (isNasaTheme) {
+        CITY_LIGHTS.forEach(([cLon, cLat, intensity]) => {
+          const pt = projectPoint(cLon, cLat, radius, centerX, centerY, curRotX, curRotY);
+          if (pt.z > 0.05) {
+            // City lights softly glow
+            const flicker = 0.85 + Math.sin(time * 3 + cLon) * 0.15;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 1.8 * intensity, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(254, 240, 138, ${0.75 * intensity * flicker})`; // Golden city radiance
+            ctx.shadowColor = '#facc15';
+            ctx.shadowBlur = 6 * intensity;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+        });
+      }
+
+      // 7. NASA Atmospheric Swirl & Realistic Cloud Bands
+      if (isNasaTheme) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 8;
+        for (let cLat of [-25, 5, 25, 50]) {
+          ctx.beginPath();
+          let cFirst = true;
+          for (let cLon = -180; cLon <= 180; cLon += 8) {
+            const dynamicLon = cLon + Math.sin(time * 0.15 + cLat * 0.1) * 12;
+            const pt = projectPoint(dynamicLon, cLat, radius, centerX, centerY, curRotX, curRotY);
+            if (pt.z > 0.05) {
+              if (cFirst) {
+                ctx.moveTo(pt.x, pt.y);
+                cFirst = false;
+              } else {
+                ctx.lineTo(pt.x, pt.y);
+              }
+            } else {
+              cFirst = true;
+            }
+          }
+          ctx.stroke();
+        }
+
+        // NASA / NOAA Orbit Track line (ISS / Earth Observation Simulation)
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)'; // Gold orbital path
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        let oFirst = true;
+        for (let step = -180; step <= 180; step += 5) {
+          const orbitLat = Math.sin(((step + time * 8) * Math.PI) / 180) * 51.6;
+          const pt = projectPoint(step, orbitLat, radius, centerX, centerY, curRotX, curRotY);
+          if (pt.z > 0.02) {
+            if (oFirst) {
+              ctx.moveTo(pt.x, pt.y);
+              oFirst = false;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            oFirst = true;
+          }
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // 8. Dynamic Day/Night Terminator Shadow Effect
+      const terminatorGrad = ctx.createLinearGradient(
+        centerX - radius,
+        centerY,
+        centerX + radius,
+        centerY
+      );
+      terminatorGrad.addColorStop(0, 'rgba(2, 6, 23, 0)');
+      terminatorGrad.addColorStop(0.55, 'rgba(2, 6, 23, 0.08)');
+      terminatorGrad.addColorStop(0.85, 'rgba(2, 6, 23, 0.42)');
+      terminatorGrad.addColorStop(1, 'rgba(2, 6, 23, 0.70)');
+      ctx.fillStyle = terminatorGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 9. Telemetry Nodes, NASA Natural Hazards & Threat Markers
+      let hitNode = null;
+      const mouse = mousePosRef.current;
 
       globeNodes.forEach((node) => {
         const [lat, lon] = node.coordinates;
-        const pt = projectPoint(lon, lat, radius, centerX, centerY, rotX, localRotY);
+        const pt = projectPoint(lon, lat, radius, centerX, centerY, curRotX, curRotY);
 
-        // Render only if on front hemisphere
+        // Render only if on front visible hemisphere
         if (pt.z > 0.05) {
           const isSelected = selectedCountry && node.country?.toLowerCase() === selectedCountry.toLowerCase();
+          const isNasa = node.type === 'nasa';
+          const isCyber = node.type === 'cyber';
 
-          // Determine marker color from Risk scale
-          let markerColor = '#36D6B0'; // Low (Teal)
-          if (node.riskClassification === RISK_LEVELS.HIGH || node.severity === 'Critical') {
+          // Determine marker color
+          let markerColor = '#36D6B0'; // Default Emerald/Teal
+          if (isNasa) {
+            markerColor = '#f59e0b'; // NASA Hazard Flame
+          } else if (isCyber) {
+            markerColor = '#a855f7'; // Cyber Threat Purple
+          } else if (node.riskClassification === RISK_LEVELS.HIGH || node.severity === 'Critical') {
             markerColor = '#FF4D5A'; // Critical Red
           } else if (node.riskClassification === RISK_LEVELS.MEDIUM || node.severity === 'High') {
             markerColor = '#FF8A45'; // High Orange
-          } else if (node.riskScore > 40) {
-            markerColor = '#F5C451'; // Medium Amber
           }
 
-          // Pulsing radar ring
+          // Pulsing radar ping ring
           const pulse = (time * 2 + (node.riskScore || 10)) % 2;
-          const pulseRadius = 5 + pulse * 7;
+          const pulseRadius = 5 + pulse * (isNasa ? 9 : 7);
           const pulseAlpha = Math.max(0, 1 - pulse / 2);
 
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, pulseRadius, 0, Math.PI * 2);
           ctx.strokeStyle = markerColor;
-          ctx.globalAlpha = pulseAlpha * 0.75;
-          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = pulseAlpha * 0.85;
+          ctx.lineWidth = isNasa ? 2.0 : 1.5;
           ctx.stroke();
           ctx.globalAlpha = 1;
 
           // Inner solid core node
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, isSelected ? 6 : 4, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, isSelected ? 6.5 : isNasa ? 5.0 : 4.0, 0, Math.PI * 2);
           ctx.fillStyle = markerColor;
           ctx.shadowColor = markerColor;
-          ctx.shadowBlur = isSelected ? 16 : 8;
+          ctx.shadowBlur = isSelected || isNasa ? 18 : 8;
           ctx.fill();
           ctx.shadowBlur = 0;
 
-          // Country Label for prominent nodes
-          if (pt.z > 0.5 || isSelected) {
-            ctx.font = '10px monospace';
-            ctx.fillStyle = isSelected ? '#00C2FF' : '#EAF2F8';
-            ctx.fillText(node.country || node.city, pt.x + 8, pt.y + 3);
+          // Country / Hazard label for prominent or selected nodes
+          if (pt.z > 0.55 || isSelected || isNasa) {
+            ctx.font = isNasa ? 'bold 9px monospace' : '9px monospace';
+            ctx.fillStyle = isNasa ? '#fbbf24' : isSelected ? '#00C2FF' : '#EAF2F8';
+            const labelText = isNasa
+              ? `⚡ ${node.title ? (node.title.length > 20 ? node.title.slice(0, 20) + '...' : node.title) : 'NASA Hazard'}`
+              : node.country || node.city;
+            ctx.fillText(labelText, pt.x + 8, pt.y + 3);
           }
 
           // Mouse hit test
-          const dx = pt.x - mousePos.x;
-          const dy = pt.y - mousePos.y;
+          const dx = pt.x - mouse.x;
+          const dy = pt.y - mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 18) {
-            activeHover = { ...node, screenX: pt.x, screenY: pt.y };
+            hitNode = { ...node, screenX: pt.x, screenY: pt.y };
           }
         }
       });
 
-      setHoveredNode(activeHover);
+      // Update hovered node only if target ID changed to eliminate unnecessary React re-renders
+      if (hitNode?.id !== hoveredNodeRef.current?.id) {
+        hoveredNodeRef.current = hitNode;
+        setHoveredNode(hitNode);
+      }
 
       ctx.restore(); // End sphere clipping
 
-      // 6. Perimeter Cyber Ring & Outer Border
+      // 10. Outer Atmospheric Perimeter Ring
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0, 194, 255, 0.5)';
+      ctx.strokeStyle = isNasaTheme ? 'rgba(56, 189, 248, 0.45)' : 'rgba(0, 194, 255, 0.50)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Outer dashed tech ring
+      // Outer dashed tactical telemetry ring
       ctx.beginPath();
       ctx.setLineDash([4, 8]);
       ctx.arc(centerX, centerY, radius + 8, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(54, 214, 176, 0.3)';
+      ctx.strokeStyle = isNasaTheme ? 'rgba(52, 211, 153, 0.35)' : 'rgba(54, 214, 176, 0.30)';
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.setLineDash([]);
@@ -362,7 +618,7 @@ export default function InteractiveGlobe({
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [rotX, rotY, zoom, isRotating, mousePos, globeNodes, selectedCountry, projectPoint]);
+  }, [globeTheme, globeNodes, selectedCountry, projectPoint]);
 
   // Handle Resize
   useEffect(() => {
@@ -390,18 +646,18 @@ export default function InteractiveGlobe({
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
-      setMousePos({
+      mousePosRef.current = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
-      });
+      };
     }
 
     if (!isDraggingRef.current) return;
     const dx = e.clientX - lastMouseRef.current.x;
     const dy = e.clientY - lastMouseRef.current.y;
 
-    setRotY((prev) => prev + dx * 0.006);
-    setRotX((prev) => Math.max(-1.1, Math.min(1.1, prev - dy * 0.006)));
+    rotYRef.current += dx * 0.005;
+    rotXRef.current = Math.max(-1.1, Math.min(1.1, rotXRef.current - dy * 0.005));
 
     lastMouseRef.current = { x: e.clientX, y: e.clientY };
   };
@@ -413,19 +669,21 @@ export default function InteractiveGlobe({
   const handleWheel = (e) => {
     e.preventDefault();
     const delta = e.deltaY * -0.001;
-    setZoom((prev) => Math.min(2.0, Math.max(0.7, prev + delta)));
+    zoomRef.current = Math.min(2.2, Math.max(0.65, zoomRef.current + delta));
+    setZoomDisplay(zoomRef.current);
   };
 
   const handleCanvasClick = () => {
-    if (hoveredNode && onSelectCountry) {
-      onSelectCountry(hoveredNode.country);
+    const current = hoveredNodeRef.current;
+    if (current && onSelectCountry && current.country) {
+      onSelectCountry(current.country);
     }
   };
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-2xl border border-midnight-border bg-gradient-to-b from-midnight-surface to-midnight-base shadow-2xl backdrop-blur-md"
+      className="relative w-full overflow-hidden rounded-2xl border border-navy-700/70 bg-gradient-to-b from-navy-900 to-navy-950 shadow-2xl backdrop-blur-md"
       style={{ height }}
     >
       {/* 3D Canvas Viewport */}
@@ -441,109 +699,157 @@ export default function InteractiveGlobe({
       />
 
       {/* Floating Header Overlay */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2 pointer-events-none">
-        <span className="flex h-2.5 w-2.5 rounded-full bg-accent-cyan shadow-[0_0_10px_#00C2FF] animate-pulse" />
-        <span className="font-mono text-[11px] font-bold tracking-wider text-accent-cyan uppercase">
-          Interactive Geospatial Sphere
+      <div className="absolute top-4 left-4 z-10 flex flex-wrap items-center gap-2">
+        <span className="flex h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee] animate-pulse" />
+        <span className="font-mono text-xs font-bold tracking-wider text-cyan-400 uppercase">
+          {globeTheme === 'nasa' ? 'NASA Planetary Earth Sphere' : 'Tactical Cyber Globe'}
         </span>
-        <span className="text-[10px] font-mono text-accent-muted bg-midnight-blue/70 border border-midnight-border px-2 py-0.5 rounded">
-          {globeNodes.length} NODES
+        <span className="text-[10px] font-mono text-slate-300 bg-navy-800/90 border border-navy-700 px-2 py-0.5 rounded">
+          {globeNodes.length} ACTIVE NODES
+        </span>
+        <span className="text-[10px] font-mono text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded flex items-center gap-1">
+          <Satellite className="h-3 w-3" />
+          <span>NASA EONET + Night Lights</span>
         </span>
       </div>
 
-      {/* Floating Controls HUD */}
+      {/* Interactive Controls Overlay */}
       {showControls && (
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-midnight-surface/85 border border-midnight-border rounded-xl p-1.5 backdrop-blur-md shadow-lg">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-navy-900/90 border border-navy-700/80 p-1 rounded-xl backdrop-blur-md shadow-lg">
+          {/* Globe Theme Toggle (NASA Planetary vs Tactical) */}
           <button
-            onClick={() => setIsRotating((r) => !r)}
-            className="p-1.5 rounded-lg text-accent-secondary hover:text-white hover:bg-midnight-blue transition-colors"
-            title={isRotating ? 'Pause rotation' : 'Start rotation'}
+            onClick={() => setGlobeTheme((t) => (t === 'nasa' ? 'tactical' : 'nasa'))}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium transition-colors flex items-center gap-1 ${
+              globeTheme === 'nasa'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Toggle NASA Earth / Tactical theme"
           >
-            {isRotating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 text-accent-cyan" />}
+            <Globe2 className="h-3.5 w-3.5" />
+            <span>{globeTheme === 'nasa' ? 'NASA Earth' : 'Tactical'}</span>
           </button>
+
+          {/* Filter Dropdown */}
+          <select
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            className="rounded-lg border border-navy-700 bg-navy-950 px-2 py-1 text-[11px] font-mono text-slate-300 focus:outline-none"
+            title="Filter Globe telemetry layers"
+          >
+            <option value="ALL">All Layers</option>
+            <option value="NASA">NASA Hazards</option>
+            <option value="CYBER">Cyber Threat Net</option>
+            <option value="INCIDENT">Stored Incidents</option>
+          </select>
+
+          {/* Rotation Toggle */}
+          <button
+            onClick={() => setIsRotatingState((r) => !r)}
+            className="p-1.5 rounded-lg text-slate-300 hover:bg-navy-800 transition-colors"
+            title={isRotatingState ? 'Pause Rotation' : 'Resume Rotation'}
+          >
+            {isRotatingState ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+
+          {/* Reset Orientation */}
           <button
             onClick={() => {
-              setRotX(0.3);
-              setRotY(1.4);
-              setZoom(1.0);
+              rotXRef.current = 0.25;
+              rotYRef.current = 1.4;
+              zoomRef.current = 1.0;
+              setZoomDisplay(1.0);
             }}
-            className="p-1.5 rounded-lg text-accent-secondary hover:text-white hover:bg-midnight-blue transition-colors"
-            title="Reset sphere orientation"
+            className="p-1.5 rounded-lg text-slate-300 hover:bg-navy-800 transition-colors"
+            title="Reset Globe Orientation"
           >
             <RotateCcw className="h-4 w-4" />
           </button>
-          <div className="w-[1px] h-4 bg-midnight-border mx-0.5" />
+
+          {/* Zoom In */}
           <button
-            onClick={() => setZoom((z) => Math.min(2.0, z + 0.15))}
-            className="p-1.5 rounded-lg text-accent-secondary hover:text-white hover:bg-midnight-blue transition-colors"
-            title="Zoom in"
+            onClick={() => {
+              zoomRef.current = Math.min(2.2, zoomRef.current + 0.15);
+              setZoomDisplay(zoomRef.current);
+            }}
+            className="p-1.5 rounded-lg text-slate-300 hover:bg-navy-800 transition-colors"
+            title="Zoom In"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
+
+          {/* Zoom Out */}
           <button
-            onClick={() => setZoom((z) => Math.max(0.7, z - 0.15))}
-            className="p-1.5 rounded-lg text-accent-secondary hover:text-white hover:bg-midnight-blue transition-colors"
-            title="Zoom out"
+            onClick={() => {
+              zoomRef.current = Math.max(0.65, zoomRef.current - 0.15);
+              setZoomDisplay(zoomRef.current);
+            }}
+            className="p-1.5 rounded-lg text-slate-300 hover:bg-navy-800 transition-colors"
+            title="Zoom Out"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {/* Interactive Floating Node HUD Tooltip */}
+      {/* Hover Node Tooltip Card */}
       {hoveredNode && (
         <div
-          className="absolute z-20 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3"
+          className="absolute z-20 pointer-events-none rounded-xl border border-navy-700/90 bg-navy-900/95 p-3 text-xs text-white shadow-2xl backdrop-blur-md max-w-[280px]"
           style={{
-            left: `${hoveredNode.screenX}px`,
-            top: `${hoveredNode.screenY - 12}px`,
+            left: Math.min(hoveredNode.screenX + 12, (containerRef.current?.clientWidth || 400) - 290),
+            top: Math.max(12, Math.min(hoveredNode.screenY - 20, height - 140)),
           }}
         >
-          <div className="rounded-xl border border-accent-cyan/60 bg-midnight-surface/95 px-3.5 py-2.5 shadow-2xl backdrop-blur-md text-xs min-w-[190px]">
-            <div className="flex items-center justify-between gap-2 border-b border-midnight-border pb-1.5 mb-1.5">
-              <span className="font-bold text-accent-ice text-sm">
-                {hoveredNode.country || hoveredNode.city}
+          <div className="flex items-center gap-1.5 border-b border-navy-800 pb-1.5">
+            {hoveredNode.type === 'nasa' ? (
+              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">
+                ⚡ NASA EONET HAZARD
               </span>
-              <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
-                  hoveredNode.riskClassification === RISK_LEVELS.HIGH
-                    ? 'border-risk-critical/40 bg-risk-critical/15 text-risk-critical'
-                    : hoveredNode.riskClassification === RISK_LEVELS.MEDIUM
-                      ? 'border-risk-high/40 bg-risk-high/15 text-risk-high'
-                      : 'border-risk-low/40 bg-risk-low/15 text-risk-low'
-                }`}
-              >
-                {hoveredNode.riskClassification || hoveredNode.severity || 'MONITORED'}
+            ) : hoveredNode.type === 'cyber' ? (
+              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-purple-400 bg-purple-500/20 px-1.5 py-0.5 rounded border border-purple-500/30">
+                🛡 CYBER THREAT NODE
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/20 px-1.5 py-0.5 rounded border border-cyan-500/30">
+                {hoveredNode.type === 'incident' ? 'INCIDENT' : 'MONITORING SITE'}
+              </span>
+            )}
+          </div>
+          <p className="mt-1.5 font-bold text-slate-100 text-sm leading-snug">
+            {hoveredNode.title || hoveredNode.country}
+          </p>
+          <div className="mt-1.5 space-y-1 text-[11px] font-mono text-slate-300">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Category:</span>
+              <span className="text-cyan-300 font-semibold">{hoveredNode.riskCategory}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Coordinates:</span>
+              <span>
+                {hoveredNode.coordinates[0].toFixed(1)}°, {hoveredNode.coordinates[1].toFixed(1)}°
               </span>
             </div>
-            <div className="space-y-1 font-mono text-[11px] text-accent-secondary">
-              <div className="flex justify-between">
-                <span className="text-accent-muted">Risk Score:</span>
-                <span className="font-bold text-accent-ice">{hoveredNode.riskScore ?? '—'}/100</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-accent-muted">Category:</span>
-                <span className="text-accent-ice truncate max-w-[110px]">{hoveredNode.riskCategory || 'Geopolitical'}</span>
-              </div>
-              <div className="flex justify-between text-[10px]">
-                <span className="text-accent-muted">Coords:</span>
-                <span>
-                  {hoveredNode.coordinates[0].toFixed(2)}°, {hoveredNode.coordinates[1].toFixed(2)}°
-                </span>
-              </div>
-            </div>
-            <div className="mt-2 pt-1 border-t border-midnight-border/60 text-[10px] text-accent-cyan font-mono flex items-center justify-between">
-              <span>Click to view profile</span>
-              <ExternalLink className="h-3 w-3" />
+            <div className="flex justify-between">
+              <span className="text-slate-400">Source:</span>
+              <span className="text-amber-300">{hoveredNode.source}</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Footer Instructions */}
-      <div className="absolute bottom-3 inset-x-4 z-10 flex items-center justify-between pointer-events-none text-[10px] font-mono text-accent-muted">
-        <span>DRAG TO ROTATE • SCROLL TO ZOOM</span>
-        <span className="hidden sm:inline">PROJECTION: ORTHOGRAPHIC 3D</span>
+      {/* Bottom Telemetry Bar */}
+      <div className="pointer-events-none absolute bottom-3 left-4 right-4 z-10 flex items-center justify-between text-[10px] font-mono text-slate-400 bg-navy-950/80 border border-navy-800/80 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <span>NASA PLANETARY SPHERE</span>
+          <span>•</span>
+          <span>ZOOM: {zoomDisplay.toFixed(1)}x</span>
+        </div>
+        <div className="flex items-center gap-2 text-cyan-400">
+          <span>NOCTURNAL CITY LIGHTS ON</span>
+          <span>•</span>
+          <span>EONET v3 ACTIVE</span>
+        </div>
       </div>
     </div>
   );

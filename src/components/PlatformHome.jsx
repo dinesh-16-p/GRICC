@@ -25,6 +25,7 @@ export default function PlatformHome({
   stats = null,
   alerts = [],
   incidents = [],
+  liveEvents = [],
   countryProfiles = [],
   operationalMode = 'DEMO MODE',
   onNavigate,
@@ -117,7 +118,7 @@ export default function PlatformHome({
                 Authoritative Zero-Key Ingestion Telemetry:
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {['NASA EONET', 'CISA KEV', 'UN OCHA', 'NOAA NWS', 'GDELT 2.0'].map((src) => (
+                {['NASA EONET v3', 'MapTiler GIS', 'GitHub Threat Net', 'CISA KEV', 'NOAA NWS'].map((src) => (
                   <span
                     key={src}
                     className="inline-flex items-center gap-1 rounded-md bg-midnight-blue/80 border border-midnight-border px-2.5 py-1 text-[11px] font-mono text-accent-secondary"
@@ -135,6 +136,7 @@ export default function PlatformHome({
             <InteractiveGlobe
               locations={countryProfiles.length > 0 ? countryProfiles : undefined}
               incidents={incidents}
+              liveEvents={liveEvents}
               onSelectCountry={(country) => {
                 if (onSelectCountry) onSelectCountry(country);
                 else if (onNavigate) onNavigate('country-risk');

@@ -1,6 +1,8 @@
 /**
  * Cybersecurity Threat Intelligence Service
- * Provider: US Cybersecurity and Infrastructure Security Agency (CISA) KEV Public Catalog / NVD
+ * Primary Providers:
+ *   1. US CISA Known Exploited Vulnerabilities (KEV) Official Feed (Zero Key)
+ *   2. GitHub FireHOL Open Threat Intelligence Net (firehol/blocklist-ipsets) (Zero Key)
  */
 
 let cache = {
@@ -10,6 +12,44 @@ let cache = {
   error: null,
 };
 
+/**
+ * Fetch live active malicious IP indicators and botnet C2 ranges directly from GitHub FireHOL open dataset.
+ */
+async function fetchGitHubThreatFeeds(timeoutMs = 5000) {
+  try {
+    const url = 'https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset';
+    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) return [];
+
+    const text = await res.text();
+    const lines = text
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('#'));
+
+    // Extract top active threat ranges
+    const samples = lines.slice(0, 6);
+    return samples.map((ipRange, idx) => ({
+      id: `GH-THREAT-${ipRange.replace(/[/.]/g, '-')}`,
+      cveId: `IOC-IP-${ipRange}`,
+      title: `Active Inbound Cyber Threat Range: ${ipRange}`,
+      vendor: 'GitHub FireHOL Threat Net',
+      product: 'Active Botnet / Malware Distribution Node',
+      severity: idx < 2 ? 'Critical' : 'High',
+      dateAdded: new Date().toISOString().slice(0, 10),
+      dueDate: 'Immediate Block',
+      description: `Malicious IP range ${ipRange} identified by firehol/blocklist-ipsets as an active participant in malicious traffic, port-scanning, or C2 botnet communications.`,
+      action: `Enforce boundary firewall block rule for subnet ${ipRange}.`,
+      source: 'GitHub Threat Net (firehol/blocklist-ipsets)',
+      url: 'https://github.com/firehol/blocklist-ipsets',
+      isLive: true,
+    }));
+  } catch (err) {
+    console.warn('[CYBER SERVICE] GitHub FireHOL feed unavailable:', err.message);
+    return [];
+  }
+}
+
 export const cyberService = {
   id: 'cyber',
   name: 'Cyber Threat Intelligence Net',
@@ -17,7 +57,7 @@ export const cyberService = {
 
   getStatus() {
     const hasKey = Boolean(process.env.CYBER_THREAT_API_KEY);
-    const providerName = process.env.CYBER_THREAT_API_PROVIDER || 'CISA Known Exploited Vulnerabilities (KEV) Catalog';
+    const providerName = process.env.CYBER_THREAT_API_PROVIDER || 'CISA KEV + GitHub FireHOL Threat Net';
 
     let status = 'STANDBY_DEMO';
     if (cache.data?.isLive) {
@@ -53,60 +93,72 @@ export const cyberService = {
     }
 
     const startTime = Date.now();
+    let cisaItems = [];
+    let githubItems = [];
 
-    // 1. Query Legitimate CISA Known Exploited Vulnerabilities (KEV) Official Feed (Zero key required)
-    try {
-      const url = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    // 1. Fetch both CISA KEV and GitHub FireHOL datasets in parallel
+    const [cisaRes, ghItems] = await Promise.allSettled([
+      fetch('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json', {
+        signal: AbortSignal.timeout(6000),
+      }),
+      fetchGitHubThreatFeeds(5000),
+    ]);
 
-      if (res.ok) {
-        const json = await res.json();
-        const vulnerabilities = json.vulnerabilities || [];
-        if (vulnerabilities.length > 0) {
-          // Take the most recently added vulnerabilities (from end of catalog)
-          const recent = vulnerabilities.slice(-8).reverse();
-
-          const normalized = recent.map((vuln) => {
-            return {
-              id: vuln.cveID || `CYB-${Math.random()}`,
-              cveId: vuln.cveID || 'CVE-UNKNOWN',
-              title: `${vuln.vendorProject} ${vuln.product} — ${vuln.vulnerabilityName || 'Exploited Vulnerability'}`,
-              vendor: vuln.vendorProject || 'Enterprise Vendor',
-              product: vuln.product || 'Infrastructure Software',
-              severity: 'Critical', // CISA KEV catalog lists only actively exploited vulnerabilities in the wild
-              dateAdded: vuln.dateAdded || new Date().toISOString().slice(0, 10),
-              dueDate: vuln.dueDate || 'Immediate',
-              description: vuln.shortDescription || 'Actively exploited vulnerability verified by federal cybersecurity authorities.',
-              action: vuln.requiredAction || 'Apply vendor patch or mitigations.',
-              source: 'CISA Known Exploited Vulnerabilities (KEV)',
-              url: vuln.notes ? vuln.notes.split(';')[0].trim() : `https://nvd.nist.gov/vuln/detail/${vuln.cveID}`,
-              isLive: true,
-            };
-          });
-
-          const payload = {
-            sourceId: this.id,
-            sourceName: this.name,
-            provider: 'CISA Known Exploited Vulnerabilities (KEV) Authoritative Feed',
-            isLive: true,
-            mode: 'LIVE MODE',
-            lastUpdated: new Date().toISOString(),
-            latencyMs: Date.now() - startTime,
-            disclaimer: 'LIVE FEED — Official cybersecurity advisories and active CVE exploit telemetry from CISA.',
-            items: normalized,
-          };
-
-          cache = { data: payload, timestamp: new Date().toISOString(), lastAttempt: cache.lastAttempt, error: null };
-          return payload;
-        }
-      }
-    } catch (err) {
-      console.warn('[CYBER SERVICE] CISA KEV feed timed out or unavailable:', err.message);
-      cache.error = err;
+    if (ghItems.status === 'fulfilled' && Array.isArray(ghItems.value)) {
+      githubItems = ghItems.value;
     }
 
-    // 2. Fallback to Curated Standby Demo Telemetry
-    return this.getDemoFallback(cache.error ? 'DEGRADED' : 'STANDBY');
+    if (cisaRes.status === 'fulfilled' && cisaRes.value.ok) {
+      try {
+        const json = await cisaRes.value.json();
+        const vulnerabilities = json.vulnerabilities || [];
+        if (vulnerabilities.length > 0) {
+          const recent = vulnerabilities.slice(-6).reverse();
+          cisaItems = recent.map((vuln) => ({
+            id: vuln.cveID || `CYB-${Math.random()}`,
+            cveId: vuln.cveID || 'CVE-UNKNOWN',
+            title: `${vuln.vendorProject} ${vuln.product} — ${vuln.vulnerabilityName || 'Exploited Vulnerability'}`,
+            vendor: vuln.vendorProject || 'Enterprise Vendor',
+            product: vuln.product || 'Infrastructure Software',
+            severity: 'Critical',
+            dateAdded: vuln.dateAdded || new Date().toISOString().slice(0, 10),
+            dueDate: vuln.dueDate || 'Immediate',
+            description: vuln.shortDescription || 'Actively exploited vulnerability verified by federal cybersecurity authorities.',
+            action: vuln.requiredAction || 'Apply vendor patch or mitigations.',
+            source: 'CISA Known Exploited Vulnerabilities (KEV)',
+            url: vuln.notes ? vuln.notes.split(';')[0].trim() : `https://nvd.nist.gov/vuln/detail/${vuln.cveID}`,
+            isLive: true,
+          }));
+        }
+      } catch (err) {
+        console.warn('[CYBER SERVICE] Error parsing CISA KEV JSON:', err.message);
+      }
+    } else if (cisaRes.status === 'rejected') {
+      console.warn('[CYBER SERVICE] CISA KEV feed timed out or unavailable:', cisaRes.reason?.message);
+    }
+
+    const combinedItems = [...cisaItems, ...githubItems];
+    if (combinedItems.length > 0) {
+      const payload = {
+        sourceId: this.id,
+        sourceName: this.name,
+        provider: cisaItems.length > 0 
+          ? 'CISA KEV + GitHub FireHOL Threat Net' 
+          : 'GitHub FireHOL Open Threat Intelligence Feed',
+        isLive: true,
+        mode: 'LIVE MODE',
+        lastUpdated: new Date().toISOString(),
+        latencyMs: Date.now() - startTime,
+        disclaimer: 'LIVE FEED — Real-time cybersecurity telemetry from CISA KEV and GitHub open threat intelligence repositories.',
+        items: combinedItems,
+      };
+
+      cache = { data: payload, timestamp: new Date().toISOString(), lastAttempt: cache.lastAttempt, error: null };
+      return payload;
+    }
+
+    // 2. Fallback to Curated Standby Demo Telemetry if both external feeds are unavailable
+    return this.getDemoFallback('STANDBY');
   },
 
   getDemoFallback(reason = 'STANDBY') {

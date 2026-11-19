@@ -315,8 +315,7 @@ export const apiService = {
   // ==========================================
 
   getEventStreamUrl() {
-    const token = getAuthToken();
-    return token ? `${API_BASE_URL}/events/stream?token=${encodeURIComponent(token)}` : null;
+    return `${API_BASE_URL}/events/stream`;
   },
 
   async getNotifications(params = {}) {

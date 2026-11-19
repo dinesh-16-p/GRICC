@@ -3,6 +3,7 @@ module.exports = {
     {
       name: 'gricc-backend',
       script: 'server/index.js',
+      cwd: __dirname,
       // IMPORTANT: Keep instances: 1 (fork mode).
       // In-memory cacheService and SSE client registry are single-process only.
       instances: 1,

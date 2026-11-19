@@ -219,10 +219,7 @@ export const authService = {
       throw createHttpError(423, 'Account is temporarily locked due to repeated failed login attempts. Try again later.', 'AccountLocked');
     }
 
-    const isDevMasterPassword =
-      process.env.NODE_ENV !== 'production' &&
-      ['admin123', 'griccadmin!2026', 'password123', 'admin'].includes(password.toLowerCase());
-    const isPasswordValid = isDevMasterPassword || bcrypt.compareSync(password, userRow.password_hash);
+    const isPasswordValid = bcrypt.compareSync(password, userRow.password_hash);
     if (!isPasswordValid) {
       console.warn(`[AUTH] Failed login: invalid password for user="${userRow.username}"`);
       const nextAttempts = (userRow.failed_login_attempts || 0) + 1;

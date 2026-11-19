@@ -109,7 +109,15 @@ try {
   assert.equal(viewerLogin.status, 200);
   const viewerToken = viewerLogin.data.token;
 
-  // 6. RBAC
+  // 6. RBAC & Production Authentication Enforcement
+  const unauthReq = await req('GET', '/api/users');
+  assert.equal(unauthReq.status, 401, 'Unauthenticated request must receive 401 in production');
+  assert.equal(unauthReq.data.code, 'TOKEN_MISSING');
+
+  const invalidTokenReq = await req('GET', '/api/users', { token: 'invalid.jwt.token' });
+  assert.equal(invalidTokenReq.status, 401, 'Invalid token must receive 401 in production');
+  assert.equal(invalidTokenReq.data.code, 'TOKEN_INVALID');
+
   assert.equal((await req('GET', '/api/users', { token: viewerToken })).status, 403);
   assert.equal((await req('GET', '/api/performance/overview', { token: viewerToken })).status, 403);
   assert.equal((await req('GET', '/api/users', { token: adminToken })).status, 200);
@@ -139,7 +147,17 @@ try {
   assert.equal(notFound.status, 404);
   assert.equal(Boolean(notFound.data.stack), false);
 
-  // 12. SSE compatibility
+  // 12. SSE compatibility & production authentication enforcement
+  const unauthSseRes = await fetch(`${baseUrl}/api/events/stream`);
+  assert.equal(unauthSseRes.status, 401, 'Unauthenticated SSE request must receive 401 in production');
+  const unauthSseData = await unauthSseRes.json();
+  assert.equal(unauthSseData.code, 'TOKEN_MISSING');
+
+  const invalidSseRes = await fetch(`${baseUrl}/api/events/stream?token=invalid.jwt.token`);
+  assert.equal(invalidSseRes.status, 401, 'Invalid SSE token must receive 401 in production');
+  const invalidSseData = await invalidSseRes.json();
+  assert.equal(invalidSseData.code, 'TOKEN_INVALID');
+
   const sseController = new AbortController();
   const sseRes = await fetch(`${baseUrl}/api/events/stream?token=${encodeURIComponent(adminToken)}`, { signal: sseController.signal });
   assert.equal(sseRes.status, 200);

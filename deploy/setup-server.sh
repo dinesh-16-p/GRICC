@@ -6,6 +6,7 @@
 # ==============================================================================
 
 set -euo pipefail
+export DEBIAN_FRONTEND=noninteractive
 
 echo "=================================================="
 echo "  GRICC 2.0 Production Server Provisioning"
@@ -89,6 +90,8 @@ mkdir -p /var/www/certbot
 mkdir -p /var/log/gricc
 chown -R gricc:gricc /var/www/gricc
 chown -R gricc:gricc /var/log/gricc
+chmod 755 /var/www/gricc
+chmod 755 /var/www/certbot
 
 # 8. Configure Fail2Ban for SSH Protection
 echo "[8/8] Enabling Fail2Ban..."

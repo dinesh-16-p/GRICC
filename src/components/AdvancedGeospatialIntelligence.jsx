@@ -39,6 +39,29 @@ const SEV_COLORS = {
   Low: '#34d399',
 };
 
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || 'BE8E5HFWGrNH05pGD0M4';
+
+const BASE_TILES = {
+  maptiler_dark: {
+    id: 'maptiler_dark',
+    name: 'MapTiler Dark',
+    url: `https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> &copy; OpenStreetMap',
+  },
+  maptiler_satellite: {
+    id: 'maptiler_satellite',
+    name: 'MapTiler Satellite',
+    url: `https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
+    attribution: '&copy; MapTiler &copy; OpenStreetMap',
+  },
+  carto_dark: {
+    id: 'carto_dark',
+    name: 'CartoDB Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  },
+};
+
 function MapResizeController() {
   const map = useMap();
   useEffect(() => {
@@ -56,6 +79,7 @@ export default function AdvancedGeospatialIntelligence({ canModify = false, isAd
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [tileError, setTileError] = useState(false);
+  const [baseTileStyle, setBaseTileStyle] = useState('maptiler_dark');
   const [error, setError] = useState('');
 
   // Filters
@@ -347,6 +371,20 @@ export default function AdvancedGeospatialIntelligence({ canModify = false, isAd
                 {lyr.label}
               </button>
             ))}
+
+            {/* Base Tile Layer Style */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <span className="text-[11px] font-mono text-slate-400">Map Style:</span>
+              <select
+                value={baseTileStyle}
+                onChange={(e) => setBaseTileStyle(e.target.value)}
+                className="bg-navy-950 border border-navy-700 text-xs font-mono text-cyan-300 rounded px-2 py-1 focus:outline-none"
+              >
+                <option value="maptiler_dark">MapTiler Dataviz Dark</option>
+                <option value="maptiler_satellite">MapTiler Satellite Hybrid</option>
+                <option value="carto_dark">CartoDB Dark Matter</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -434,8 +472,9 @@ export default function AdvancedGeospatialIntelligence({ canModify = false, isAd
             >
               <MapResizeController />
               <TileLayer
-                attribution="&copy; OpenStreetMap contributors"
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                key={baseTileStyle}
+                attribution={BASE_TILES[baseTileStyle]?.attribution || '&copy; MapTiler &copy; OpenStreetMap'}
+                url={BASE_TILES[baseTileStyle]?.url || BASE_TILES.maptiler_dark.url}
                 eventHandlers={{ tileerror: () => setTileError(true) }}
               />
 

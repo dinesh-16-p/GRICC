@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { sampleLocations, RISK_LEVELS } from '../data/mapData';
+import InteractiveGlobe from './InteractiveGlobe';
 import {
   Globe,
   Filter,
@@ -13,7 +14,54 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Satellite,
+  Compass,
 } from 'lucide-react';
+
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || 'BE8E5HFWGrNH05pGD0M4';
+
+const BASE_MAPS = {
+  maptiler_dark: {
+    id: 'maptiler_dark',
+    name: 'MapTiler Dark',
+    url: `https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+    subdomains: '',
+  },
+  maptiler_satellite: {
+    id: 'maptiler_satellite',
+    name: 'MapTiler Satellite',
+    url: `https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+    subdomains: '',
+  },
+  maptiler_topo: {
+    id: 'maptiler_topo',
+    name: 'MapTiler Topo',
+    url: `https://api.maptiler.com/maps/topo-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+    subdomains: '',
+  },
+  nasa_night: {
+    id: 'nasa_night',
+    name: 'NASA GIBS Night',
+    url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_CityLights_2012/default//GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg',
+    attribution: '&copy; NASA Earth Science Data / GIBS / EOSDIS',
+    maxZoom: 8,
+    subdomains: '',
+  },
+  carto_dark: {
+    id: 'carto_dark',
+    name: 'CartoDB Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19,
+    subdomains: 'abcd',
+  },
+};
 
 /**
  * Controller to handle map invalidation on resize / mount
@@ -118,6 +166,8 @@ export default function WorldMap({
   const [selectedCountry, setSelectedCountry] = useState('ALL');
   const [selectedSeverity, setSelectedSeverity] = useState('ALL');
   const [activeLocation, setActiveLocation] = useState(null);
+  const [activeBaseMap, setActiveBaseMap] = useState('maptiler_dark');
+  const [viewMode, setViewMode] = useState('2d'); // '2d' | '3d'
 
   const profileMap = new Map(
     (countryProfiles || []).map((p) => [p.country.toLowerCase(), p])
@@ -188,8 +238,55 @@ export default function WorldMap({
           </div>
         </div>
 
-        {/* Demo Data Watermark Badge */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
+        {/* Mode Switcher & Layer Selector */}
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+          {/* 2D / 3D Mode Toggle */}
+          <div className="flex items-center rounded-xl bg-navy-950/80 p-1 border border-navy-700/80">
+            <button
+              onClick={() => setViewMode('2d')}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-mono font-medium transition-all ${
+                viewMode === '2d'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>2D Map (MapTiler)</span>
+            </button>
+            <button
+              onClick={() => setViewMode('3d')}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-mono font-medium transition-all ${
+                viewMode === '3d'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span>3D NASA Globe</span>
+            </button>
+          </div>
+
+          {/* Base Map Selector (2D only) */}
+          {viewMode === '2d' && (
+            <div className="flex items-center gap-1.5 bg-navy-950/80 px-2.5 py-1 rounded-xl border border-navy-700/80">
+              <span className="text-[11px] font-mono text-slate-400 uppercase flex items-center gap-1">
+                <Satellite className="h-3 w-3 text-cyan-400" /> Layer:
+              </span>
+              <select
+                value={activeBaseMap}
+                onChange={(e) => setActiveBaseMap(e.target.value)}
+                className="bg-navy-900 border border-navy-700 text-xs font-mono text-cyan-300 rounded px-2 py-0.5 focus:outline-none"
+              >
+                <option value="maptiler_dark">MapTiler Dataviz Dark</option>
+                <option value="maptiler_satellite">MapTiler Satellite Hybrid</option>
+                <option value="maptiler_topo">MapTiler Topographic</option>
+                <option value="nasa_night">NASA GIBS Night Lights</option>
+                <option value="carto_dark">CartoDB Dark Matter</option>
+              </select>
+            </div>
+          )}
+
+          {/* Demo Data Watermark Badge */}
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-mono font-medium text-amber-300">
             <Info className="h-3.5 w-3.5" />
             <span>DEMO DATA • SIMULATED METRICS</span>
@@ -317,31 +414,42 @@ export default function WorldMap({
         </div>
       </div>
 
-      {/* 2. & 9. INTERACTIVE WORLD MAP CONTAINER */}
+      {/* 2. & 9. INTERACTIVE WORLD MAP / 3D NASA GLOBE CONTAINER */}
       <div className="relative w-full h-[460px] md:h-[520px] bg-navy-950 overflow-hidden">
-        <MapContainer
-          center={[24.0, 15.0]}
-          zoom={2}
-          minZoom={2}
-          maxZoom={10}
-          zoomControl={true}
-          scrollWheelZoom={true}
-          dragging={true}
-          className="w-full h-full"
-          style={{ width: '100%', height: '100%' }}
-        >
-          <MapController />
-
-          {/* CartoDB Dark Matter / OpenStreetMap Dark Tile Layer */}
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            maxZoom={19}
-            subdomains="abcd"
+        {viewMode === '3d' ? (
+          <InteractiveGlobe
+            locations={filteredLocations}
+            incidents={validIncidents}
+            liveEvents={validLiveEvents}
+            onSelectCountry={onSelectCountryProfile}
+            height={520}
+            showControls={true}
           />
+        ) : (
+          <MapContainer
+            center={[24.0, 15.0]}
+            zoom={2}
+            minZoom={2}
+            maxZoom={10}
+            zoomControl={true}
+            scrollWheelZoom={true}
+            dragging={true}
+            className="w-full h-full"
+            style={{ width: '100%', height: '100%' }}
+          >
+            <MapController />
 
-          {/* 3. & 4. & 5. SAMPLE MONITORING MARKERS & POPUPS */}
-          {filteredLocations.map((loc) => {
+            {/* Dynamic MapTiler / NASA GIBS / CartoDB Tile Layer */}
+            <TileLayer
+              key={activeBaseMap}
+              url={BASE_MAPS[activeBaseMap]?.url || BASE_MAPS.maptiler_dark.url}
+              attribution={BASE_MAPS[activeBaseMap]?.attribution || BASE_MAPS.maptiler_dark.attribution}
+              maxZoom={BASE_MAPS[activeBaseMap]?.maxZoom || 19}
+              subdomains={BASE_MAPS[activeBaseMap]?.subdomains || 'abcd'}
+            />
+
+            {/* 3. & 4. & 5. SAMPLE MONITORING MARKERS & POPUPS */}
+            {filteredLocations.map((loc) => {
             const icon = createCustomMarkerIcon(loc.riskClassification, loc.riskScore);
 
             return (
@@ -595,6 +703,7 @@ export default function WorldMap({
             );
           })}
         </MapContainer>
+        )}
 
         {/* Map Quick Status Overlay Indicator */}
         <div className="pointer-events-none absolute bottom-4 left-4 z-[400] flex items-center gap-2 rounded-lg border border-navy-700/80 bg-navy-900/90 px-3 py-1.5 text-[11px] font-mono text-slate-300 backdrop-blur-md shadow-lg">

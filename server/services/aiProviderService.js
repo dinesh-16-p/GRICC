@@ -74,10 +74,13 @@ async function callExternalProvider({ systemPrompt, userPrompt, config }) {
       } else if (config.provider === 'gemini') {
         const model = config.model || 'gemini-2.0-flash';
         res = await fetchWithTimeout(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey,
+            },
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: systemPrompt }] },
               contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
@@ -124,10 +127,14 @@ async function callExternalProvider({ systemPrompt, userPrompt, config }) {
     } catch (err) {
       if (err.name === 'AbortError') {
         lastErr = createHttpError(504, `AI provider request timed out after ${config.timeoutMs}ms.`, 'ProviderTimeoutError');
-      } else if (err.status && err.status < 500) {
-        throw err;
+      } else if (Number.isInteger(err.status) && err.status >= 400 && err.status < 500) {
+        throw createHttpError(err.status, 'External AI provider request failed with client error.', 'ProviderError');
       } else {
-        lastErr = err;
+        lastErr = createHttpError(
+          503,
+          'AI provider network request failed.',
+          'ProviderUnavailableError'
+        );
       }
     }
 

@@ -18,18 +18,23 @@ echo "=================================================="
 echo "[1/6] Installing dependencies and building production bundle..."
 npm ci
 npm run build
+
+# 2. Run automated production readiness self-test (verify build before pruning)
+echo "[2/6] Running production readiness self-test..."
+npm run test:readiness
+
+# 3. Prune development dependencies for minimal production attack surface
+echo "[3/6] Pruning development dependencies..."
 npm prune --omit=dev
 
-# 3. Verify SQLite Database Permissions & WAL Mode
-echo "[3/6] Verifying SQLite database..."
+# 4. Verify SQLite Database Permissions, Backups & Log Directories
+echo "[4/6] Verifying SQLite database, backup, and log directories..."
 mkdir -p "$APP_DIR/server/data"
 mkdir -p "$APP_DIR/server/backups"
+mkdir -p "$APP_DIR/logs"
 chmod 700 "$APP_DIR/server/data"
 chmod 700 "$APP_DIR/server/backups"
-
-# 4. Run automated production readiness verification
-echo "[4/6] Running production readiness self-test..."
-npm run test:readiness
+chmod 700 "$APP_DIR/logs"
 
 # 5. Start / Reload PM2 in Single-Instance Fork Mode
 echo "[5/6] Supervising Express backend with PM2..."
